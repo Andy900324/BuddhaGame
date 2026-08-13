@@ -1,7 +1,7 @@
 # 《運命》—— 邱長春大仙修行模擬器　專案說明文件
 
 > 本文件說明本資料夾的**現況**：專案內容、檔案清單、遊戲架構、備份演進與注意事項。
-> 最後更新：2026-08-13（本次更新：建立 GitHub Pages 部署結構 `docs/`、`source/`、`archive/`）
+> 最後更新：2026-08-13（本次更新：GitHub Pages 改為從根目錄發布，主文件與配置移至根目錄，本文件移入 `docs/`）
 
 ---
 
@@ -32,23 +32,24 @@ TODO: GitHub Pages URL
 ```text
 Repository/
 │
-├─ README.md                          ← 本說明文件
+├─ index.html                         ← 遊戲正式入口（主文件，完整遊戲，單檔自含）
+├─ 404.html                           ← 頁面不存在（古卷風格）
+├─ .nojekyll                          ← 關閉 Jekyll，純靜態
+│
+├─ docs/                              ← 文件資料
+│   ├─ README.md                      ← 本說明文件
+│   └─ WorkRecord/                    ← 工作日誌
 │
 ├─ source/                            ← 開發資料
 │   ├─ 邱大仙行誼_遊戲腳本v1.md        ← 文字腳本 v1（母本）
 │   └─ 插圖預覽.html                   ← 15 張 SVG 插圖預覽
 │
-├─ archive/                           ← 歷史備份（.bak-*）
-│   └─ 邱大仙行誼_互動遊戲.html.bak-*  ← 7 個遊戲主檔備份＋1 個腳本備份
-│
-└─ docs/                              ← GitHub Pages 正式發布內容
-    ├─ index.html                     ← 遊戲正式入口（完整遊戲）
-    ├─ 404.html                       ← 頁面不存在（古卷風格）
-    ├─ .nojekyll                      ← 關閉 Jekyll，純靜態
-    └─ WorkRecord/                    ← 工作日誌
+└─ archive/                           ← 歷史備份（.bak-*）
+    └─ 邱大仙行誼_互動遊戲.html.bak-*  ← 7 個遊戲主檔備份＋1 個腳本備份
 ```
 
-- `docs/`：**GitHub Pages 正式網站**（唯一會被發布的內容）
+- **根目錄**：**GitHub Pages 正式網站**（唯一會被發布的內容：`index.html`、`404.html`、`.nojekyll`）
+- `docs/`：**文件資料**（README、工作日誌；不會被發布）
 - `source/`：**遊戲腳本與開發資料**（不會被發布）
 - `archive/`：**歷史備份**（不會被發布）
 
@@ -57,9 +58,9 @@ Repository/
 GitHub Pages：
 
 - Branch：`main`
-- Folder：`/docs`
+- Folder：`/`（根目錄）
 
-在 Repository 的 **Settings → Pages** 中設定上述 Branch / Folder 後，`docs/index.html` 即成為網站首頁。
+在 Repository 的 **Settings → Pages** 中設定上述 Branch / Folder 後，根目錄的 `index.html` 即成為網站首頁。
 
 ---
 
@@ -69,10 +70,10 @@ GitHub Pages：
 
 | 路徑 | 大小 | 行數 | 說明 |
 |---|---|---|---|
-| `README.md` | — | — | **本說明文件** |
-| `docs/index.html` | 約 135 KB | 1800 | **互動遊戲主檔（正式入口）**：完整遊戲，由原 `邱大仙行誼_互動遊戲.html` 更名而來 |
-| `docs/404.html` | — | — | 404 頁面（深墨＋金線古卷風格），含「返回《運命》」入口 |
-| `docs/.nojekyll` | 0 | — | 空白檔案，關閉 GitHub Pages 的 Jekyll 處理 |
+| `index.html` | 約 135 KB | 1800 | **互動遊戲主檔（正式入口）**：完整遊戲，由原 `邱大仙行誼_互動遊戲.html` 更名而來 |
+| `404.html` | — | — | 404 頁面（深墨＋金線古卷風格），含「返回《運命》」入口 |
+| `.nojekyll` | 0 | — | 空白檔案，關閉 GitHub Pages 的 Jekyll 處理 |
+| `docs/README.md` | — | — | **本說明文件** |
 | `docs/WorkRecord/` | — | — | 工作日誌資料夾（每次任務留下時間戳記錄） |
 | `source/邱大仙行誼_遊戲腳本v1.md` | 約 48 KB | 761 | **文字腳本 v1（母本）**：完整劇本、數值設定、正解路線驗算。改劇情先改這裡 |
 | `source/插圖預覽.html` | 約 29 KB | 121 | 插圖預覽頁：內嵌 **15 張** SVG 水墨插圖總覽（僅供檢視插圖用） |
@@ -89,10 +90,10 @@ GitHub Pages：
 
 ### 2-2 建議維護方式
 
-- 想玩遊戲（本機）→ 用瀏覽器開啟 `docs/index.html`。
-- 想上線 → 修改 `docs/index.html` 後 commit 並 push 至 `main`，GitHub Pages（`/docs`）即自動更新。
-- 想改劇情／數值 → 先改 `source/邱大仙行誼_遊戲腳本v1.md`，再把文字同步進 `docs/index.html` 的 `EVENTS`／`TALKS`／`STORIES` 物件。
-- 想改插圖 → 先開 `source/插圖預覽.html` 檢視，實際插圖位於 `docs/index.html` 的 `ART` 物件（每張為一個 `<svg>` 字串）。
+- 想玩遊戲（本機）→ 用瀏覽器開啟 `index.html`。
+- 想上線 → 修改 `index.html` 後 commit 並 push 至 `main`，GitHub Pages（根目錄）即自動更新。
+- 想改劇情／數值 → 先改 `source/邱大仙行誼_遊戲腳本v1.md`，再把文字同步進 `index.html` 的 `EVENTS`／`TALKS`／`STORIES` 物件。
+- 想改插圖 → 先開 `source/插圖預覽.html` 檢視，實際插圖位於 `index.html` 的 `ART` 物件（每張為一個 `<svg>` 字串）。
 - 大改動建議以 **Git Commit** 取代 `.bak-*`；穩定版本用 **Git Tag**；正式版本用 **GitHub Release**。
 
 ---
@@ -188,11 +189,11 @@ HTML 中實作的章節結構（與腳本的四章略有重新編排）：
 - 文字腳本 v1 定稿（含正解路線數值驗算表）。
 - 互動遊戲全流程可玩：10 事件＋2 討論＋1 敘事＋特殊事件＋6 結局＋回向＋結語。
 - 15 張內嵌 SVG 插圖；PPT 講義匯出功能。
-- **GitHub Pages 部署結構**：`docs/index.html` 為正式入口，`docs/.nojekyll`、`docs/404.html` 已建立；`source/`、`archive/` 分離完成。
+- **GitHub Pages 部署結構**：根目錄 `index.html` 為正式入口，根目錄 `404.html`、`.nojekyll` 已就位；`docs/`（文件）、`source/`（開發資料）、`archive/`（備份）分離完成。
 
 ### ⚠️ 現況注意事項
 - **README 與 git**：本專案為 git 儲存庫（`main` 分支、已連遠端 `origin`）。已移除僅含 `# Hello` 的佔位檔 `READEME.md`（拼字錯誤、無內容）。
 - **腳本與程式章節編排不同**：腳本為「事件一～十七＋特殊事件」的連續編號；HTML 重新分為四章（ev1–ev4／ev5–ev6／ev7–ev10／特殊事件）。修改時須對照兩者。
 - **腳本特性一數值 vs 程式**：腳本寫「壞情況扣 5% 意志力」，程式實際為 **10%**（`curse()`）；腳本 E13 判定與程式 ev6 的數值增減亦有出入。若須一致，以腳本為準或回寫程式。
-- **GitHub Pages 尚未實際設定**：需至 Repository 的 Settings → Pages 設定 Branch=`main`、Folder=`/docs`，並將 README 中 `TODO: GitHub Pages URL` 替換為實際網址。
+- **GitHub Pages 尚未實際設定**：需至 Repository 的 Settings → Pages 設定 Branch=`main`、Folder=`/`（根目錄），並將本文件中 `TODO: GitHub Pages URL` 替換為實際網址。
 - **備份檔**：已集中至 `archive/`，內容未刪除、未修改。
