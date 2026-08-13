@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>運命 —— 邱長春大仙修行模擬</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#14110e; --paper:#ece3d2; --paper2:#d8ccb4;
+  --gold:#c9a227; --gold2:#e8c65a; --red:#a83232; --red2:#c94f4f;
+  --jade:#5b8c7b; --line:rgba(201,162,39,.28);
+}
+html,body{height:100%;}
+body{
+  background:var(--ink);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201,162,39,.07), transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(168,50,50,.07), transparent 60%);
+  color:var(--paper);
+  font-family:"Noto Serif TC","Source Han Serif TC","MingLiU","PMingLiU",serif;
+  line-height:1.9; letter-spacing:.03em;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:900px;margin:0 auto;padding:16px 16px 64px;min-height:100vh;}
+
+/* ---------- 通用 ---------- */
+.card{
+  background:linear-gradient(160deg,rgba(236,227,210,.055),rgba(236,227,210,.02));
+  border:1px solid var(--line); border-radius:4px;
+  padding:24px 22px; margin-bottom:16px;
+  box-shadow:0 2px 24px rgba(0,0,0,.4) inset, 0 4px 18px rgba(0,0,0,.3);
+}
+.center{text-align:center;}
+h1{font-size:clamp(34px,9vw,62px);letter-spacing:.34em;text-indent:.34em;
+   color:var(--gold2);font-weight:400;margin-bottom:6px;
+   text-shadow:0 0 26px rgba(201,162,39,.35);}
+h2{font-size:clamp(19px,4.4vw,25px);color:var(--gold);font-weight:400;
+   letter-spacing:.14em;margin-bottom:14px;}
+h3{font-size:17px;color:var(--gold);font-weight:400;letter-spacing:.1em;margin-bottom:10px;}
+p{margin-bottom:13px;}
+.sub{color:var(--paper2);opacity:.8;font-size:14px;letter-spacing:.2em;}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:18px 0;}
+.quote{border-left:2px solid var(--red);padding:6px 0 6px 15px;margin:14px 0;
+  color:var(--paper2);font-size:15px;line-height:2;}
+.em{color:var(--gold2);}
+.red{color:var(--red2);}
+.small{font-size:13px;opacity:.75;line-height:1.85;}
+
+/* ---------- 按鈕 ---------- */
+.btn{display:inline-block;background:transparent;color:var(--gold2);
+  border:1px solid var(--gold);border-radius:3px;
+  padding:12px 34px;font-size:16px;letter-spacing:.24em;text-indent:.24em;
+  font-family:inherit;cursor:pointer;transition:.25s;margin:6px 4px;}
+.btn:hover{background:rgba(201,162,39,.14);box-shadow:0 0 18px rgba(201,162,39,.25);}
+.btn.ghost{border-color:var(--line);color:var(--paper2);}
+.btn.ghost:hover{background:rgba(236,227,210,.06);}
+.btn.small-btn{padding:8px 18px;font-size:13px;letter-spacing:.12em;text-indent:.12em;}
+
+/* ---------- 狀態列 ---------- */
+#hud{position:sticky;top:0;z-index:20;background:rgba(20,17,14,.94);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--line);
+  padding:9px 14px;margin:-16px -16px 16px;}
+.hud-top{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:12px;letter-spacing:.14em;color:var(--paper2);margin-bottom:8px;}
+.bars{display:grid;gap:7px;}
+.bar-row{display:grid;grid-template-columns:72px 1fr 46px;gap:9px;align-items:center;font-size:12px;}
+.bar-name{color:var(--paper2);letter-spacing:.06em;}
+.bar-track{height:8px;background:rgba(236,227,210,.09);
+  border:1px solid rgba(236,227,210,.14);border-radius:5px;overflow:hidden;}
+.bar-fill{display:block;height:100%;width:0;border-radius:4px;
+  background:linear-gradient(90deg,rgba(255,255,255,.82),#fff);
+  transition:width .8s cubic-bezier(.4,0,.2,1);}
+.bar-val{text-align:right;font-size:12px;color:var(--paper2);font-variant-numeric:tabular-nums;}
+.f-will{box-shadow:0 0 9px rgba(127,179,196,.75);}
+.f-heart{box-shadow:0 0 9px rgba(208,106,106,.75);}
+.f-prog{box-shadow:0 0 9px rgba(232,198,90,.8);}
+.danger{animation:pulse 1.1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.traits{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+.trait{font-size:11px;border:1px solid var(--line);border-radius:2px;
+  padding:3px 9px;color:var(--paper2);letter-spacing:.06em;}
+.trait b{color:var(--gold2);font-weight:400;}
+.trait .sep{opacity:.4;margin:0 5px;}
+.trait.done{border-color:var(--jade);color:#8fc9b3;}
+.trait.done b{color:#8fc9b3;}
+.trait.demon{border-color:var(--red);color:var(--red2);}
+
+/* ---------- 插圖 ---------- */
+.art{display:block;width:100%;height:auto;margin:4px 0 18px;
+  border:1px solid var(--line);border-radius:3px;
+  background:radial-gradient(ellipse at 50% 120%, rgba(201,162,39,.10), rgba(0,0,0,.32) 70%);}
+.art .ink{fill:none;stroke:#ece3d2;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.art .gold{fill:none;stroke:#c9a227;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.art .far{fill:none;stroke:#c9a227;stroke-width:1.4;opacity:.42;stroke-linecap:round;}
+.art .red{fill:none;stroke:#a83232;stroke-width:2.2;stroke-linecap:round;}
+.art .fillp{fill:#ece3d2;stroke:none;}
+.art .fillg{fill:#c9a227;stroke:none;}
+.art .fillr{fill:#a83232;stroke:none;}
+.art .dim{opacity:.55;}
+.art .glow{filter:drop-shadow(0 0 6px rgba(201,162,39,.75));}
+
+/* ---------- 事件 ---------- */
+.ch-label{font-size:12px;letter-spacing:.4em;color:var(--gold);opacity:.85;margin-bottom:6px;}
+.scene{font-size:16px;line-height:2.15;color:var(--paper);}
+.scene .hl{color:var(--gold2);}
+.ask{margin:20px 0 4px;color:var(--gold2);font-size:17px;letter-spacing:.08em;}
+.opts{display:grid;gap:10px;margin-top:12px;}
+.opt{text-align:left;background:rgba(236,227,210,.035);
+  border:1px solid var(--line);border-radius:3px;
+  padding:14px 16px;color:var(--paper);font-family:inherit;font-size:15.5px;
+  line-height:1.8;cursor:pointer;transition:.2s;display:flex;gap:12px;align-items:flex-start;}
+.opt:hover{background:rgba(201,162,39,.11);border-color:var(--gold);transform:translateX(3px);}
+.opt .num{color:var(--gold);flex:0 0 auto;font-size:15px;}
+
+/* ---------- 討論頁 ---------- */
+.qbox{border:1px solid var(--line);border-radius:3px;padding:16px 18px;margin:12px 0;
+  background:rgba(236,227,210,.03);}
+.qnum{color:var(--gold);font-size:13px;letter-spacing:.24em;margin-bottom:6px;}
+.qtext{font-size:17px;line-height:2;color:var(--paper);}
+.reveal{opacity:0;transition:opacity 1.4s ease;pointer-events:none;}
+.reveal.show{opacity:1;pointer-events:auto;}
+.tap{border:1px dashed var(--line);border-radius:3px;padding:13px;margin-top:16px;
+  text-align:center;color:var(--gold);font-size:14px;letter-spacing:.16em;
+  cursor:pointer;transition:.25s;user-select:none;}
+.tap:hover{background:rgba(201,162,39,.1);border-color:var(--gold);}
+.ans{border-left:2px solid var(--gold);background:rgba(201,162,39,.07);
+  padding:14px 18px;margin:14px 0;font-size:16.5px;line-height:2.1;color:var(--gold2);}
+
+/* ---------- 結果 ---------- */
+.result{border-color:var(--gold);animation:fade .5s;}
+@keyframes fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.verdict{font-size:19px;letter-spacing:.16em;margin-bottom:12px;}
+.v-ok{color:var(--gold2);} .v-mid{color:#d0a86a;} .v-bad{color:var(--red2);}
+.src{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:3px;
+  padding:13px 15px;margin:14px 0;font-size:14.5px;line-height:2.05;color:var(--paper2);}
+.src .tag{display:block;font-size:11px;letter-spacing:.26em;color:var(--gold);
+  margin-bottom:7px;opacity:.9;}
+.delta{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;}
+.d{font-size:13px;border-radius:2px;padding:3px 11px;border:1px solid;}
+.d.up{color:#8fc9b3;border-color:rgba(91,140,123,.55);background:rgba(91,140,123,.1);}
+.d.down{color:var(--red2);border-color:rgba(168,50,50,.5);background:rgba(168,50,50,.1);}
+.d.info{color:var(--gold2);border-color:var(--line);background:rgba(201,162,39,.08);}
+.d.hunger{color:#d89a63;border-color:rgba(200,120,60,.55);background:rgba(200,120,60,.1);}
+.curse{border:1px dashed var(--red);background:rgba(168,50,50,.08);
+  padding:12px 14px;margin:13px 0;font-size:14px;color:#e0a0a0;border-radius:3px;}
+.good{border:1px dashed var(--jade);background:rgba(91,140,123,.1);color:#8fc9b3;}
+.shine{border:1px dashed var(--gold);background:rgba(201,162,39,.1);color:var(--gold2);}
+
+/* ---------- 遺言表 ---------- */
+.wills{width:100%;border-collapse:collapse;font-size:15px;margin:12px 0;}
+.wills td{padding:11px 8px;border-bottom:1px solid rgba(236,227,210,.12);vertical-align:top;line-height:1.95;}
+.wills td:first-child{color:var(--gold2);white-space:nowrap;width:88px;}
+.wills tr.me td{background:rgba(201,162,39,.09);}
+
+/* ---------- 結局 ---------- */
+.ending-title{font-size:clamp(26px,7vw,44px);color:var(--gold2);letter-spacing:.26em;
+  text-indent:.26em;text-align:center;margin:10px 0 18px;
+  text-shadow:0 0 30px rgba(201,162,39,.4);}
+.ed-step{font-size:12px;letter-spacing:.34em;color:var(--gold);text-align:center;
+  margin-bottom:14px;opacity:.85;}
+.vow{text-align:center;font-size:17px;line-height:2.4;color:var(--gold2);letter-spacing:.06em;}
+.fail-mark{font-size:clamp(30px,8vw,50px);color:var(--red2);letter-spacing:.3em;
+  text-indent:.3em;text-align:center;margin:8px 0 14px;}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0;}
+.tbl td{padding:7px 6px;border-bottom:1px solid rgba(236,227,210,.1);vertical-align:top;}
+.tbl td:first-child{color:var(--gold);white-space:nowrap;width:82px;}
+.seven{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;}
+.seven span{border:1px solid var(--line);padding:5px 13px;font-size:14px;
+  color:var(--paper2);border-radius:2px;}
+.seven span.me{border-color:var(--gold);color:var(--gold2);}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  background:rgba(20,17,14,.96);border:1px solid var(--gold);color:var(--gold2);
+  padding:11px 22px;border-radius:3px;font-size:14px;letter-spacing:.1em;
+  z-index:99;display:none;box-shadow:0 4px 22px rgba(0,0,0,.6);}
+@media(max-width:520px){
+  .card{padding:19px 15px;}
+  .scene{font-size:15.5px;line-height:2.05;}
+  .opt{font-size:15px;padding:12px 13px;}
+  .bar-row{grid-template-columns:64px 1fr 42px;}
+  .trait{font-size:10.5px;}
+  .wills td:first-child{width:70px;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+/* =======================================================================
+   章節
+   第一章　學道拜師　事件一～四
+   第二章　麻衣論相　事件五、討論、師父遺言、事件六
+   第三章　相隨心變　事件七～十（含討論）
+   第四章　天仙狀元　特殊事件通過後的結局
+   ======================================================================= */
+const CH = {
+  1:{name:"第一章　學道拜師", start:"ev1"},
+  2:{name:"第二章　麻衣論相", start:"ev5"},
+  3:{name:"第三章　相隨心變", start:"ev7"},
+  4:{name:"第四章　天仙狀元", start:null}
+};
+
+/* =======================================================================
+   插圖：水墨簡筆，直接寫在檔案裡（離線可用、無外部資源）
+   每張 800×180，深墨底＋金線＋宣紙白，對應該事件的場景。
+   ======================================================================= */
+const SVG_HEAD='<svg class="art" viewBox="0 0 800 180" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
+const HILLS='<path class="far" d="M0,132 L92,92 L150,120 L232,74 L300,116 L372,88 L440,124 L520,96 L600,130 L680,104 L760,134 L800,118"/>';
+const HILLS2='<path class="far" style="opacity:.24" d="M0,110 L70,78 L128,102 L200,60 L268,100 L340,72 L410,108 L500,80 L580,112 L660,86 L740,116 L800,98"/>';
+const MOON='<circle class="fillg glow" cx="700" cy="44" r="13" opacity=".8"/>';
+const GROUND='<path class="gold" style="opacity:.5" d="M0,150 L800,150"/>';
+
+/* 簡筆人物：立、跪、拜、行 */
+function man(x,y,s,pose,cls){
+  s=s||1; cls=cls||"ink";
+  const g=`<g class="${cls}" transform="translate(${x},${y}) scale(${s})">`;
+  if(pose==="kneel")   // 跪拜
+    return g+`<circle class="fillp" cx="0" cy="-26" r="6"/><path d="M0,-20 C-4,-10 -8,-2 -14,2"/><path d="M-14,2 L6,2"/><path d="M-2,-14 L-12,-6"/></g>`;
+  if(pose==="bow")     // 躬身作揖
+    return g+`<circle class="fillp" cx="2" cy="-30" r="6"/><path d="M2,-24 C0,-14 -2,-6 -2,2"/><path d="M-2,2 L-8,16 M-2,2 L6,16"/><path d="M0,-18 L10,-14 L2,-8"/></g>`;
+  if(pose==="lie")     // 臥
+    return g+`<circle class="fillp" cx="-18" cy="-6" r="6"/><path d="M-12,-4 L14,-2"/><path d="M-4,-4 L2,-12"/></g>`;
+  if(pose==="carry")   // 背人
+    return g+`<circle class="fillp" cx="0" cy="-30" r="6"/><path d="M0,-24 L-1,-4"/><path d="M-1,-4 L-8,12 M-1,-4 L7,12"/><path d="M-8,-18 L8,-18"/>
+      <circle class="fillp" cx="10" cy="-34" r="5"/><path d="M10,-29 C4,-24 0,-22 -6,-20"/></g>`;
+  if(pose==="walk")
+    return g+`<circle class="fillp" cx="0" cy="-28" r="6"/><path d="M0,-22 L0,-4"/><path d="M0,-4 L-9,12 M0,-4 L8,12"/><path d="M0,-16 L9,-10"/></g>`;
+  if(pose==="sit")     // 打坐
+    return g+`<circle class="fillp" cx="0" cy="-24" r="6"/><path d="M0,-18 L0,-4"/><path d="M-13,4 C-6,-4 6,-4 13,4"/><path d="M-13,4 L13,4"/></g>`;
+  return g+`<circle class="fillp" cx="0" cy="-28" r="6"/><path d="M0,-22 L0,-2"/><path d="M0,-2 L-7,14 M0,-2 L7,14"/><path d="M-9,-14 L9,-14"/></g>`;
+}
+/* 茅庵 */
+function hut(x,y,s){
+  return `<g class="ink" transform="translate(${x},${y}) scale(${s||1})">
+    <path d="M-34,0 L0,-26 L34,0"/><path d="M-28,0 L-28,26 M28,0 L28,26"/>
+    <path d="M-28,26 L28,26"/><path class="gold" d="M-9,26 L-9,6 L9,6 L9,26"/>
+    <path d="M-40,2 L40,2"/></g>`;
+}
+/* 松樹 */
+function pine(x,y,s){
+  return `<g class="gold" transform="translate(${x},${y}) scale(${s||1})">
+    <path d="M0,0 L0,-34"/><path d="M0,-30 L-12,-20 M0,-30 L12,-20"/>
+    <path d="M0,-22 L-15,-10 M0,-22 L15,-10"/><path d="M0,-14 L-17,0 M0,-14 L17,0"/></g>`;
+}
+/* 水波 */
+function waves(y,op,amp){
+  amp=amp||6; op=op||.6;
+  let d="";
+  for(let i=0;i<3;i++){
+    const yy=y+i*11;
+    d+=`<path class="gold" style="opacity:${op-i*.14}" d="M0,${yy} q40,-${amp} 80,0 t80,0 t80,0 t80,0 t80,0 t80,0 t80,0 t80,0 t80,0 t80,0"/>`;
+  }
+  return d;
+}
+
+const ART={
+/* 事件一　祖師的反應：茅庵前跪拜，祖師擺手不收 */
+bow:SVG_HEAD+HILLS2+HILLS+MOON+GROUND+
+  hut(190,150,1.15)+pine(90,150,.9)+
+  man(330,150,1.1,"kneel")+
+  `<g class="gold" transform="translate(430,150)"><circle class="fillg" cx="0" cy="-34" r="7"/>
+   <path d="M0,-27 L0,-4"/><path d="M0,-4 L-8,14 M0,-4 L8,14"/>
+   <path d="M0,-20 L20,-26"/><path class="red" d="M20,-26 l10,-4 M20,-26 l9,4 M20,-26 l4,9"/></g>
+   <text x="470" y="120" fill="#a83232" font-size="15" font-family="serif">不收</text>`+
+  waves(0,0,0)+'</svg>',
+
+/* 事件二　祖師不收徒：庵門緊閉，庵外獨立，庵側花枝 */
+gate:SVG_HEAD+HILLS2+HILLS+GROUND+
+  `<g class="ink" transform="translate(300,150)">
+    <path d="M-46,0 L-46,-58 L46,-58 L46,0"/><path d="M-46,-58 L0,-78 L46,-58"/>
+    <path class="gold" d="M-14,0 L-14,-40 L14,-40 L14,0"/><path class="gold" d="M0,-40 L0,0"/>
+    <circle class="fillg" cx="-6" cy="-22" r="2"/><circle class="fillg" cx="6" cy="-22" r="2"/></g>`+
+  pine(120,150,1.1)+
+  `<g class="gold" transform="translate(560,150)"><path d="M0,0 C4,-20 -6,-34 2,-52"/>
+   <path d="M2,-40 q14,-8 20,-2 M1,-30 q-14,-10 -20,-4"/>
+   <circle class="fillr" cx="24" cy="-42" r="3.5"/><circle class="fillr" cx="-20" cy="-36" r="3.5"/>
+   <circle class="fillr" cx="4" cy="-54" r="3.5"/></g>`+
+  man(650,150,1,"stand")+
+  '</svg>',
+
+/* 事件三　門外聽法：門內講法透光，門外側耳 */
+listen:SVG_HEAD+HILLS2+GROUND+
+  `<g class="ink" transform="translate(300,150)">
+    <path d="M-70,0 L-70,-74 L70,-74 L70,0"/>
+    <path class="gold glow" d="M-16,0 L-16,-58 L34,-58 L34,0" style="opacity:.9"/>
+    <path class="fillg" style="opacity:.13" d="M34,-58 L150,-70 L150,10 L34,0 Z"/></g>`+
+  man(250,150,1,"sit")+
+  `<g class="gold" style="opacity:.75"><path d="M258,86 q22,-6 40,0 M262,74 q26,-8 48,0"/></g>`+
+  man(470,150,1.05,"bow")+
+  `<text x="512" y="104" fill="#c9a227" font-size="14" font-family="serif">門外洗耳</text>`+
+  pine(690,150,1)+'</svg>',
+
+/* 事件四　賜號長春：眾人環繞、跪者受道號、春枝抽芽 */
+name:SVG_HEAD+HILLS2+HILLS+GROUND+
+  hut(140,150,1)+
+  man(300,150,.9,"stand")+man(345,150,.9,"stand")+man(390,150,.9,"stand")+man(435,150,.9,"stand")+
+  man(520,150,1.15,"kneel")+
+  `<g transform="translate(620,150)"><g class="gold"><path d="M0,0 C2,-24 -4,-40 2,-60"/>
+   <path d="M2,-46 q16,-10 24,-2 M1,-34 q-16,-12 -24,-4"/></g>
+   <circle class="fillg glow" cx="26" cy="-48" r="4"/><circle class="fillg glow" cx="-23" cy="-38" r="4"/>
+   <circle class="fillg glow" cx="4" cy="-62" r="5"/></g>
+   <text x="560" y="52" fill="#e8c65a" font-size="19" font-family="serif" letter-spacing="6">長春</text>`+
+  '</svg>',
+
+/* 事件五　師父南遊：山路、四人前行、後方追趕、風雪 */
+travel:SVG_HEAD+HILLS2+HILLS+
+  `<path class="gold" style="opacity:.5" d="M0,168 C160,142 300,158 460,138 C600,122 700,140 800,126"/>`+
+  man(150,150,.95,"walk")+man(196,146,.95,"walk")+man(242,142,.95,"walk")+man(288,138,.95,"walk")+
+  man(360,140,.95,"walk")+
+  `<g class="ink" transform="translate(560,152)"><circle class="fillp" cx="0" cy="-28" r="6"/>
+   <path d="M0,-22 L0,-4"/><path d="M0,-4 L-10,12 M0,-4 L9,12"/><path d="M-2,-16 L-14,-8"/>
+   <circle class="gold" cx="-18" cy="-4" r="7"/></g>
+   <text x="590" y="140" fill="#c9a227" font-size="14" font-family="serif">追</text>`+
+  `<g class="fillp" style="opacity:.45"><circle cx="90" cy="40" r="2"/><circle cx="180" cy="26" r="1.8"/>
+   <circle cx="270" cy="52" r="2.2"/><circle cx="380" cy="30" r="1.8"/><circle cx="480" cy="58" r="2"/>
+   <circle cx="600" cy="34" r="2.2"/><circle cx="700" cy="60" r="1.8"/><circle cx="140" cy="72" r="1.6"/>
+   <circle cx="330" cy="80" r="1.6"/><circle cx="520" cy="24" r="1.6"/></g>`+
+  '</svg>',
+
+/* 討論一　祖師為什麼這麼嚴格：戒尺、蒲團、燈 */
+teach:SVG_HEAD+
+  `<g class="gold" style="opacity:.35"><path d="M60,150 L740,150"/></g>`+
+  `<g class="ink" transform="translate(250,150)"><path d="M-40,0 C-40,-16 40,-16 40,0"/>
+   <path d="M-40,0 L40,0"/><path class="gold" d="M-30,-8 L30,-8"/></g>
+   <text x="212" y="176" fill="#c9a227" font-size="13" font-family="serif">蒲團</text>`+
+  `<g transform="translate(430,110) rotate(-18)"><rect class="fillp" x="-8" y="-52" width="16" height="104" rx="3"/>
+   <path class="gold" d="M-8,-30 L8,-30 M-8,0 L8,0 M-8,30 L8,30"/></g>
+   <text x="404" y="176" fill="#c9a227" font-size="13" font-family="serif">戒尺</text>`+
+  `<g transform="translate(600,120)"><circle class="fillg glow" cx="0" cy="0" r="15" opacity=".85"/>
+   <path class="gold" d="M0,-15 C-10,-30 10,-30 0,-15"/><path class="gold" d="M-26,0 a26,26 0 0 0 52,0"/></g>
+   <text x="572" y="176" fill="#c9a227" font-size="13" font-family="serif">用心良苦</text>`+
+  '</svg>',
+
+/* 敘事　師父羽化：抬靈柩、繩索斷、終南山 */
+coffin:SVG_HEAD+HILLS2+HILLS+MOON+GROUND+
+  man(180,150,.9,"walk")+man(232,150,.9,"walk")+
+  `<g class="ink" transform="translate(330,120)"><rect x="-56" y="-14" width="112" height="28" rx="2"/>
+   <path class="gold" d="M-56,0 L56,0"/>
+   <path class="red" d="M-40,-14 C-40,-26 -30,-26 -30,-14"/>
+   <path class="red" d="M30,-14 C30,-26 40,-26 40,-14"/>
+   <path class="red" style="opacity:.5" d="M-4,-24 l-8,-6 M6,-24 l8,-6"/></g>`+
+  man(430,150,.9,"walk")+man(482,150,.9,"walk")+
+  pine(620,150,1.2)+pine(690,150,.9)+
+  `<text x="600" y="46" fill="#c9a227" font-size="14" font-family="serif">終南山下　繩索斷處</text>`+
+  '</svg>',
+
+/* 事件六　螣蛇鎖口：相士、盤中兩個饅頭 */
+face:SVG_HEAD+HILLS2+GROUND+
+  `<g class="ink" transform="translate(160,150)"><path d="M-52,0 L-52,-50 L52,-50 L52,0"/>
+   <path d="M-58,-50 L0,-72 L58,-50"/><path class="gold" d="M-12,0 L-12,-32 L12,-32 L12,0"/></g>`+
+  man(300,150,1.05,"stand")+
+  `<g transform="translate(380,118)"><ellipse class="ink" cx="0" cy="0" rx="34" ry="9"/>
+   <circle class="fillp" cx="-11" cy="-5" r="8"/><circle class="fillp" cx="11" cy="-5" r="8"/></g>
+   <text x="348" y="150" fill="#c9a227" font-size="13" font-family="serif">兩個蒸饝</text>`+
+  `<g transform="translate(600,86)"><ellipse class="ink" cx="0" cy="0" rx="42" ry="52"/>
+   <circle class="fillp" cx="-15" cy="-14" r="3"/><circle class="fillp" cx="15" cy="-14" r="3"/>
+   <path class="red" d="M-8,2 C-12,16 -14,26 -12,34"/><path class="red" d="M8,2 C12,16 14,26 12,34"/>
+   <path class="ink" d="M-12,36 q12,6 24,0"/></g>
+   <text x="556" y="166" fill="#a83232" font-size="14" font-family="serif">螣蛇鎖口</text>`+
+  '</svg>',
+
+/* 事件七　溪邊仙桃：溪水、臥石之人、漂來的桃 */
+peach:SVG_HEAD+HILLS2+HILLS+
+  waves(112,.7,7)+
+  `<g class="ink" transform="translate(220,120)"><path d="M-56,10 C-46,-14 30,-18 56,10 Z"/></g>`+
+  man(214,120,1.1,"lie")+
+  `<g transform="translate(520,124)"><circle class="fillr" cx="0" cy="0" r="14"/>
+   <path class="gold" d="M0,-14 C6,-24 14,-24 12,-16"/>
+   <path class="fillp" style="opacity:.5" d="M-5,-6 a8,8 0 0 1 6,-4"/></g>
+   <g class="gold" style="opacity:.55"><path d="M548,118 q22,-6 44,0 M556,132 q24,-6 48,0"/></g>
+   <text x="560" y="90" fill="#e8c65a" font-size="14" font-family="serif">仙桃隨波而來</text>`+
+  '</svg>',
+
+/* 事件八　秦嶺強盜：破廟、火堆、刀、麵湯 */
+bandit:SVG_HEAD+HILLS2+HILLS+GROUND+
+  `<g class="ink" transform="translate(170,150)"><path d="M-56,0 L-56,-46 L56,-46 L56,0"/>
+   <path d="M-64,-46 L0,-70 L64,-70 L64,-46" style="opacity:.8"/>
+   <path class="gold" d="M-14,0 L-14,-30 L14,-30 L14,0"/>
+   <path style="opacity:.5" d="M-40,-36 L-24,-36 M24,-36 L40,-36"/></g>`+
+  man(150,150,1,"lie")+
+  `<g transform="translate(430,146)"><path class="red glow" d="M0,0 C-14,-14 -6,-22 -2,-32 C4,-22 16,-16 0,0"/>
+   <path class="fillg" style="opacity:.8" d="M-3,-6 C-9,-14 -4,-19 -1,-25 C2,-18 8,-13 -3,-6"/>
+   <path class="ink" d="M-22,2 L22,2"/></g>`+
+  man(360,150,.95,"stand")+man(500,150,.95,"stand")+man(548,150,.95,"stand")+
+  `<g transform="translate(640,120) rotate(24)"><path class="fillp" d="M0,0 L58,-8 L64,0 L58,8 Z" opacity=".9"/>
+   <rect class="fillg" x="-16" y="-4" width="18" height="8" rx="2"/></g>
+   <text x="596" y="168" fill="#c9a227" font-size="13" font-family="serif">刀拋亂草</text>`+
+  '</svg>',
+
+/* 事件九　鐵鍊鎖樹：大樹、鐵鍊、拋出的鑰匙 */
+chain:SVG_HEAD+HILLS2+
+  `<g class="gold" style="opacity:.35"><path d="M0,158 L800,158"/></g>`+
+  `<g class="ink" transform="translate(300,158)"><path d="M0,0 L0,-96" stroke-width="7"/>
+   <path d="M0,-70 C-26,-84 -40,-70 -54,-80 M0,-58 C24,-72 42,-58 56,-70"/>
+   <g class="gold"><path d="M-70,-96 q34,-22 70,-12 q40,-12 74,10" stroke-width="2.4"/>
+   <path d="M-58,-112 q30,-18 58,-10 q34,-10 62,8" style="opacity:.65"/></g></g>`+
+  `<g class="gold"><circle cx="292" cy="90" r="7" fill="none" stroke-width="2.6"/>
+   <circle cx="306" cy="92" r="7" fill="none" stroke-width="2.6"/>
+   <circle cx="320" cy="96" r="7" fill="none" stroke-width="2.6"/>
+   <circle cx="332" cy="104" r="7" fill="none" stroke-width="2.6"/></g>`+
+  man(338,158,1.05,"sit")+
+  `<g transform="translate(600,60) rotate(-28)" class="glow"><path class="fillg" d="M0,0 h34 v6 h-34 z"/>
+   <circle class="fillg" cx="-8" cy="3" r="9"/><circle cx="-8" cy="3" r="4" fill="#14110e"/>
+   <path class="fillg" d="M28,6 h5 v7 h-5 z M20,6 h5 v7 h-5 z"/></g>
+   <g class="gold" style="opacity:.5"><path d="M560,96 q30,-24 62,-40"/></g>
+   <text x="596" y="128" fill="#c9a227" font-size="13" font-family="serif">鑰匙拋向空中</text>`+
+  '</svg>',
+
+/* 討論二　面相 vs 心相 */
+mind:SVG_HEAD+
+  `<g transform="translate(250,90)"><ellipse class="ink" cx="0" cy="0" rx="46" ry="58"/>
+   <circle class="fillp" cx="-16" cy="-14" r="3"/><circle class="fillp" cx="16" cy="-14" r="3"/>
+   <path class="red" d="M-9,4 C-13,18 -15,28 -13,38 M9,4 C13,18 15,28 13,38"/>
+   <path class="ink" d="M-13,40 q13,6 26,0"/></g>
+   <text x="214" y="172" fill="#d8ccb4" font-size="15" font-family="serif">面　相</text>`+
+  `<g class="gold" style="opacity:.75"><path d="M340,90 L456,90" stroke-width="2"/>
+   <path d="M444,82 L458,90 L444,98"/></g>
+   <text x="360" y="76" fill="#c9a227" font-size="13" font-family="serif">相隨心變</text>`+
+  `<g transform="translate(560,90)"><ellipse class="gold" cx="0" cy="0" rx="46" ry="58"/>
+   <circle class="fillg" cx="-16" cy="-14" r="3"/><circle class="fillg" cx="16" cy="-14" r="3"/>
+   <path class="gold" d="M-14,26 q14,10 28,0"/>
+   <path class="fillr glow" d="M0,4 C-9,-8 -24,0 -16,12 C-11,19 0,28 0,28 C0,28 11,19 16,12 C24,0 9,-8 0,4 Z" opacity=".92"/></g>
+   <text x="524" y="172" fill="#e8c65a" font-size="15" font-family="serif">心　相</text>`+
+  '</svg>',
+
+/* 事件十　蟠溪六年：背人過河、化齋 */
+river:SVG_HEAD+HILLS2+HILLS+
+  waves(104,.7,8)+
+  `<g class="gold" style="opacity:.45"><path d="M0,150 L200,150 M600,150 L800,150"/></g>`+
+  man(120,150,1,"stand")+
+  man(330,142,1.15,"carry")+
+  `<g class="gold" style="opacity:.6"><path d="M290,150 q16,-8 30,0 M356,152 q16,-8 30,0"/></g>`+
+  man(600,150,1,"bow")+
+  `<g transform="translate(660,132)"><ellipse class="ink" cx="0" cy="0" rx="22" ry="7"/>
+   <path class="gold" d="M-22,0 a22,10 0 0 0 44,0"/></g>
+   <text x="616" y="172" fill="#c9a227" font-size="13" font-family="serif">化齋濟眾</text>
+   <text x="96" y="46" fill="#e8c65a" font-size="15" font-family="serif">蟠　溪</text>`+
+  '</svg>',
+
+/* 特殊事件　捨己從人：大浪、墜落的人頭、刀化朝笏、雲中三官 */
+special:SVG_HEAD+HILLS2+
+  `<g class="fillg" style="opacity:.16"><ellipse cx="400" cy="40" rx="180" ry="26"/></g>`+
+  man(330,52,.72,"stand")+man(400,52,.72,"stand")+man(470,52,.72,"stand")+
+  `<text x="330" y="18" fill="#e8c65a" font-size="13" font-family="serif">天地水三官</text>`+
+  waves(96,.85,11)+
+  man(230,140,1.15,"carry")+
+  `<g transform="translate(560,126)"><circle class="fillp" cx="0" cy="0" r="11" opacity=".85"/>
+   <path class="red" d="M-10,8 q10,8 20,0"/></g>
+   <g class="gold" style="opacity:.5"><path d="M540,146 q22,-8 44,0"/></g>
+   <text x="530" y="168" fill="#a83232" font-size="13" font-family="serif">人頭墜水</text>`+
+  `<g transform="translate(690,90) rotate(8)"><rect class="fillg glow" x="-9" y="-46" width="18" height="92" rx="4" opacity=".92"/>
+   <path class="ink" style="opacity:.4" d="M-9,-22 L9,-22 M-9,10 L9,10"/></g>
+   <text x="652" y="168" fill="#c9a227" font-size="13" font-family="serif">刀化朝笏</text>`+
+  '</svg>',
+
+/* 封面 */
+cover:SVG_HEAD+HILLS2+HILLS+MOON+
+  pine(110,158,1.3)+hut(690,158,.9)+
+  man(300,158,1.1,"walk")+
+  `<g class="gold" style="opacity:.4"><path d="M0,158 L800,158"/></g>`+
+  `<g class="gold" style="opacity:.5"><path d="M360,150 q40,-10 80,-2 M470,152 q40,-10 80,-2"/></g>`+
+  '</svg>'
+};
+
+/* 特性一：命苦之人　難度旋鈕（0.30/0.30 → 選對仍有 9% 判死、21% 扣意志力） */
+const CURSE_TRIGGER = 0.30;
+const CURSE_FATAL   = 0.30;
+/* 特性二：騰蛇鎖口　改變進度（%）＝ 大餓次數 ÷ 72 */
+const BIG_HUNGER_MAX = 72;
+
+/* =======================================================================
+   事件資料（kind: ok 正解 / mid 中庸 / bad 失敗）
+   ======================================================================= */
+const EVENTS = {
+
+/* ---------------- 第一章　學道拜師 ---------------- */
+ev1:{ch:1,art:"bow",title:"事件一　祖師的反應",
+scene:`你叫<span class="hl">邱處機</span>，十九歲，隻身從山東棲霞縣走到寧海縣馬家庄。<br><br>當值的是<span class="hl">馬丹陽</span>，見你如此青年便能誠心學道，覺得罕見，登記姓名後就趕緊帶你去見老師。眾師兄也都圍過來探問。<br><br>你跪在王重陽祖師面前——`,
+ask:"猜猜看：王重陽祖師見到你來拜師時，有什麼反應？",
+opts:[
+ {t:"張開雙手，歡迎他！祖師看他頗有向道之心，開心收他為徒。",kind:"bad",
+  res:`沒有阻礙地被收進來，你會覺得修道也不過如此，並不難。<br>日子一久，早課成了應付，打坐成了打盹。意志力與修道心日益下降，最後皆歸零。<br><br><span class="small">這一條最可惜——你從沒失敗過，所以也從沒認真過。</span>`,
+  d:{will:-100,heart:-100}},
+ {t:"沒特別反應，請他入座！邱處機與一般拜師者無異。",kind:"bad",
+  res:`你成了數十名門人裡的其中一個。<br>後來祖師示現重病、遣散眾人時，那些「始勤終怠、有起頭無結尾」的人陸續走光——你也在其中，走得毫無聲息。`,
+  d:{heart:-10}},
+ {t:"趕走他！祖師一眼識破他的命運，覺得他不適合修道，直接趕走。",kind:"ok",
+  res:`你被當場拒絕。<br>可是這一拒，反而把你心裡那點向道之心，點成了火。`,
+  src:`重陽先生把他瞧了一瞧，擺一擺頭：「此人心思太多，過於伶俐，學不了道，早些急自回去罷！休得自誤。」<br>又說：「<span class="em">非是我不收他，此人苦根甚重，怕他後來受不過磨難，必生退悔之心，不如不收他為妙。</span>」`,
+  d:{will:+10,heart:+10,prog:+4}}
+]},
+
+ev2:{ch:1,art:"gate",title:"事件二　祖師不收徒，我該怎麼做？",
+scene:`你一心學道，卻被老師當塑膠。<br>跪也跪了，求也求了，祖師起身出茅庵看花去了，理都不理你。`,
+ask:"接下來你該如何是好？",
+opts:[
+ {t:"算了，回家吃自己。",kind:"bad",
+  res:`你回到荳村。這件事成了你一輩子偶爾提起的往事：「我年輕時候啊，也是去拜過師的。」<br>磨難還沒開始，退悔之心就先生了——<span class="em">祖師看得一點都沒錯</span>。`,
+  d:{heart:-10}},
+ {t:"繼續纏著老師！日日跪在茅庵外，非收我不可。",kind:"mid",
+  res:`你把「求道」做成了「求人」。祖師避你避得更遠，眾師兄也開始為難。<br>誠心沒有錯，錯在方法只剩一種。`,
+  d:{will:-15,small:3}},
+ {t:"乾脆拜馬員外（馬丹陽）為師。",kind:"ok",
+  res:`馬員外不敢收你為徒，卻把你安排住下、掃地應差，<span class="em">私下先教你打坐</span>。`,
+  src:`馬丹陽曰：「<span class="em">不可不可！求人須求大人，拜師要拜明師。</span>我不過略曉得一點初工，至於大道，我亦未聞。你且安心住下，我與你慢慢周旋。」`,
+  d:{prog:+5,heart:+5}}
+]},
+
+ev3:{ch:1,art:"listen",title:"事件三　門外聽法",
+scene:`住了幾天，你跟眾人都混熟了。這日你發現師兄們都不在前廳，想必是在後面聽先生講道。<br><br>你跑到茅庵，不敢進門，就站在門外洗耳靜聽。祖師正講到「修行念頭，細中有細，有一念之私，即有一毫渣滓在心」——講到精微之處，你聽忘了形。`,
+ask:"你的反應？",
+opts:[
+ {t:"忍住，一聲不出，把話默記在心，回去自己檢點。",kind:"ok",
+  res:`你把「煉心」二字聽進去了。煉道者若不先將心煉好，縱有妙道亦煉不成。<br>從此你每日檢點自心，看有無差失、有無過錯。`,
+  d:{prog:+5,heart:+5}},
+ {t:"無意之間喊了一聲「好！」",kind:"mid",
+  res:`講堂停了，眾門人出來全埋怨你。<br><span class="em">聰明外露，不是修道的材料。</span>`,
+  src:`重陽先生向眾子弟說：「<span class="em">門內說法，門外人聽，試問何人，誰是知音？</span>」<br>後又責他：「聞道不進，如理不悟，徒以聰明顯露、伶俐施逞，不能隱忍潛藏，只知使巧弄乖，<span class="em">非道器也</span>！」`,
+  d:{will:-15,prog:+5}},
+ {t:"索性推門進去，站到眾師兄旁邊一起聽。",kind:"bad",
+  res:`祖師當場逐客：「我曾吩咐打發他回去，為何仍在此處？」<br>這次沒有人替你求情，因為你連「門外」的分寸都守不住。`,
+  d:{heart:-10}}
+]},
+
+ev4:{ch:1,art:"name",title:"事件四　賜號長春",
+scene:`祖師怒問馬丹陽：「我曾吩咐你打發他回去，為何仍在此處？」<br><br>話沒說完，劉長生、郝太古、王玉陽、譚長真一齊上前替你求情。你跪在地下不起來。`,
+ask:"這一刻你心裡在想什麼？",
+opts:[
+ {t:"師兄們替我說話，我終於要成功了。",kind:"mid",
+  res:`你把「被收下」當成了終點。<br>祖師收你，是因為眾人再三薦引，不是因為你已經夠格。這個誤會，你要用往後三十年才還得清。`,
+  d:{heart:+5,will:-15}},
+ {t:"老師說我苦根甚重，那我就把苦受完。",kind:"ok",
+  res:`從今天起，你叫<span class="em">長春</span>。<br>祖師知道你苦業深重，才要幫你消消業障，唯恐業力妨礙你的修行之路而不能克終——<span class="em">可謂用心良苦</span>。`,
+  src:`重陽先生曰：「爾等既再三薦引……你們這般看照他，我即將他收下，<span class="em">與他取個道號名叫長春</span>。」邱啟發即起來三跪九叩。`,
+  d:{heart:+10,prog:+6}},
+ {t:"老師既然這麼不喜歡我，我少出現在他面前就好。",kind:"mid",
+  res:`你開始躲著師父。躲得掉責罵，也躲掉了造就。<br>磨難沒有來，功夫也沒有長。`,
+  d:{will:-15}}
+]},
+
+/* ---------------- 第二章　麻衣論相 ---------------- */
+ev5:{ch:2,art:"travel",title:"事件五　師父南遊",
+scene:`祖師當眾說：「我今當遠避汝於東南，免得你常來擾我。」<br><br>隔天天未亮，他帶著劉、郝、王、譚四人換了道裝，悄悄出了馬家庄——<span class="hl">唯獨不帶你</span>。<br>馬丹陽送到庄外回來，你正在收拾包袱。`,
+ask:"你怎麼做？",
+opts:[
+ {t:"師父明講不要我跟，我留下來守著馬家庄。",kind:"mid",
+  res:`你留下了。往後兩個月，你什麼責罵都沒挨到，也什麼功夫都沒長進。<br>順從不等於順師意。`,
+  d:{will:-15}},
+ {t:"追上去。師父不是真的見不得我，他是要我學好。",kind:"ok",
+  res:`馬丹陽把自己的衲衣、道帽、蒲團、便鏟、岩瓢全給了你。你穿戴起來，一路追下去。<br><br>這一路你沿途化齋供養師父，他卻嫌「我受不起你這供養」，把岩瓢奪過往地下摔，蒸饝（蒸饅頭）滾落坎下。你一句話沒說，撿起來就追。<br>飯給了師父，自己就常常空著肚子。<br><br>後來雨雪嚴寒，眾人烤火取暖，祖師把柴草全丟進火裡又按滅，濃煙燻得大家逃出山門，還把門閂上，讓你們在廊簷下凍了半夜。天亮進門，祖師要每人責打二十——<span class="em">你跪下說：是弟子一人之錯，我情願替眾師兄受責。</span>`,
+  src:`馬丹陽曰：「師傅見不得你，因此才走，你今趕去，必要受氣。」<br>邱長春曰：「<span class="em">師傅豈當真見不得我，不過願我學好，我若不去，豈不辜負師傅一片好心？</span>」<br><br>「因他是幼年學道，不比劉、郝、王、譚是化了氣質的人，<span class="em">若不深加琢磨，焉能使其成器</span>？正所謂磨他種性。誰知長春根基深厚，<span class="em">屢受叱責，並無一點怨恨之心</span>。」`,
+  d:{will:+5,heart:+10,prog:+5,small:12,mercy:1}},
+ {t:"既然師父嫌我聰明外露，我乾脆下山還俗，證明給他看。",kind:"bad",
+  res:`你賭氣走了。氣性一起，道念全消。<br>祖師說「怕他受不過磨難，必生退悔之心」——你只用兩個月就應驗了。`,
+  d:{heart:-10}}
+]},
+
+ev6:{ch:2,art:"face",title:"事件六　螣蛇鎖口",
+scene:`師父安葬之後，你一人東遊西蕩，來到河東地方，見路旁有座整齊莊院，便去化齋。小廝端了一整盤飯食出來，你正要吃——<br><br>一位鬚髮半白的老人走出來，看你一眼，<span class="hl">只從盤裡拿了兩個蒸饝（蒸饅頭）給你</span>，其餘全叫小廝端回去。<br><br>老人自稱「賽麻衣」，精通麻衣相法，斷人窮通壽夭從不差錯。<div class="quote">「適才我觀道長之相，是<span class="em">吃不得飽飯</span>的。若飽吃一頓，便要餓幾頓，不如少給一點，使你頓頓有吃，這是愚老一番好意。」<br><br>「觀你相上鼻端兩條紋路，雙分入口，名為<span class="em">螣蛇鎖口，應主餓死</span>。此厄既不能免，焉能成道？」</div>你問：「可有改乎？」<br>他答：「<span class="hl">相定終身，有何更改？除非一死方休。</span>」並舉趙武靈王（貴為國君，臨死連一個雀蛋都吃不成）、鄧通（御賜銅山鑄錢，最後餓死獄中連一口水都喝不到）為證。`,
+ask:"從小父母早亡，想認真唸書老師又不教，現在算命仙又說你注定餓死——你該怎麼辦？",
+opts:[
+ {t:"人生 Reset，砍掉重練。",kind:"bad",
+  res:`你脫下道袍還俗去了。既然修不成，那就別修——<br>這正是祖師當年最怕的那句「<span class="em">受不過磨難，必生退悔之心</span>」。`,
+  d:{heart:-15}},
+ {t:"絕望，放著給他餓死。學伯夷叔齊，知命順天。",kind:"ok",
+  res:`一念入魔，自誤終身。<span class="em">執念著魔，放棄修行，一心尋死。</span><br><br>你揀了一塊大石偃臥其上，<span class="hl">餓了七日七夜，水都不吃一口</span>。<br>你要走過桃子、強盜、鐵鍊三場，才會有人把你打醒。`,
+  src:`「賽麻衣這幾輩古人，把邱長春比掉了魂，將這熱念化作了冷灰，一團悟道之心，頓成瓦解冰消……即揀了一塊大石偃臥其上，<span class="em">餓了七日七夜，水都不吃一口</span>，安心餓死。」`,
+  d:{will:-20,big:7,small:18,demon:1}},
+ {t:"反正都要餓死了，不如及時行樂吧！",kind:"bad",
+  res:`你把最後的日子拿去換一時痛快。<br>命是照樣要走的，只是這一趟白走了。`,
+  d:{heart:-15}},
+ {t:"繼續修道，一定會有所改變的吧？",kind:"bad",
+  res:`<span class="red">由於當前的意志力與修道心不足，堅持後造成了反效果。</span><br><br>這句話本身沒有錯——錯在說這句話的時機。<br>此刻你的道心剛被賽麻衣一席話打得「熱念化作冷灰，一團悟道之心，頓成瓦解冰消」，師父又已羽化，無人可問。你嘴上說「一定會改變」，心裡那句「我注定餓死」卻一天問你三遍。<br><br>帶著這個疑心去修，打坐時想的是餓，化齋時想的是餓，越修越證明自己修不成。<span class="em">魔根沒有拔掉，只顧著往前修，一輩子也修不出來。</span><br><br>三年後你放下了蒲團，不是因為看破，是因為累了。`,
+  src:`「大凡修行人魔障一來，便要尋著他的根腳，看是從何而起，即於起處輕輕拈去，毫不費力。<span class="em">若魔在這裏著根，你往那裏尋苗，一輩子也尋不出來</span>；就把天下的好話對他說盡，說不著他的心病，他也不能服你。」`,
+  d:{heart:-15,will:-20}}
+]},
+
+/* ---------------- 第三章　相隨心變 ---------------- */
+ev7:{ch:3,art:"peach",title:"事件七　溪邊仙桃",
+scene:`你臥在溪邊大石上，餓了七日七夜，滴水不沾。<br><br>第八日不知何處落了驟雨，溪水暴漲，眼看要淹到身邊——你是求死之人，不肯尋別路而死。<br><br>第九日，上流漂來一枚拳頭大的鮮桃，隨波浪在你面前浪來浪去，一股香氣直鑽鼻孔。`,
+ask:"你吃不吃？",
+opts:[
+ {t:"不吃。趙武靈王臨死吃不到雀蛋，鄧通臨死喝不到水，我豈能例外。",kind:"bad",
+  res:`你死於執著，不是死於相法。<br><span class="em">相不定人，念定人。</span>`,
+  d:{will:-100}},
+ {t:"吃。想看看：我這臨死之際，到底吃不吃得到？",kind:"ok",
+  res:`這桃子是仙桃，救了你一命。<br>你翻身起來，卻又想：命不該死於水邊，<span class="em">必要絕於高山</span>。<br><br><span class="small">（魔根未除）</span>`,
+  src:`「伸手將鮮桃拿來啖之，<span class="em">香美非常</span>，吃畢精神大振，飢渴頓解，溪水亦消。」`,
+  d:{will:+10,prog:+4,big:7,small:18}},
+ {t:"跳進水裡，直接了斷，省得麻煩。",kind:"bad",
+  res:`你連「執一不二」都做不到，只是怕苦。`,
+  src:`「若不安命，另起一念，跳入水內，豈不省卻許多困苦？<span class="em">古人之心執一不二，不以生死移其心念，故稱良淳也。</span>」`,
+  d:{will:-100}}
+]},
+
+ev8:{ch:3,art:"bandit",title:"事件八　秦嶺強盜",
+scene:`你走到秦嶺山梁的荒僻小廟，<span class="hl">又餓了八九天</span>，眼睛只剩一線之氣。<br><br>廟外來了十幾個人生火煮肉、開酒分贓——原來是秦嶺攔路打劫的強盜，為首的叫趙璧，還有李雄、張建、王能、朱九。<br><br>酒至半酣，王能說：「咱們弟兄做了一輩子壞事，今天也做做好事好嗎？廟裡那位老師傅不是病，是餓的，我們煮碗麵湯救他一命。」<br><br>他們七手八腳煮好麵湯，把你扶起來抱住腦袋，硬灌了兩碗。`,
+ask:"你醒來後怎麼說？",
+opts:[
+ {t:"埋怨他們多事，並拒收他們要給的銀錢。",kind:"ok",
+  res:`<b class="em">關鍵四句話</b><br><br>
+  <b>一、你埋怨他們救你</b><br>「真乃求生既不可得，求死亦費許多功夫。」<br>朱九大怒拔刀，你卻拍著肚皮說：「你要殺不須殺別處，可將我肚皮割破，待我理出腸子來，還你無名之食，死也心甘。」——<span class="em">一個不怕死的人，讓他們先愣住了。</span><br><br>
+  <b>二、他們要湊銀子給你，你不收</b><br>「凡無功而得人財者，是謂無因；無故而取人錢財、吃人飲食，豈不為妄乎？」<br>並取出隨身木牌：<span class="em">妄接人財筋骨斷，妄吃人食口生瘡。</span><br><br>
+  <b>三、朱九反問</b><br>「咱們幫你幾兩銀子你都不敢要，怕帶過帶錯；像我們專以打搶營生，又不知罪惡有多大？」<br><br>
+  <b>四、你這句話，把十三個人全嚇醒了</b><br>「列位與我不同。我是前生毫未施濟於人，故今生受不得人家供奉；<span class="hl">列位是前生放得有債賑，那些人騙了你們的錢財，故而今生相見攔路討取，加倍相還。若是不少欠你們的，你們便遇他不著；縱然遇著，也輕輕放他去了。</span>」<br><br>
+  <b class="em">為什麼他們會驚愕</b><br>李雄當場算出了下一步：<span class="em">「了不得！依這道長說來，難道人人都少欠我們的？我們未必就不少欠別人的？倘若少欠別人的，再一世別人也要攔路索討，只恐我們還不清白。」</span><br>——他們一直以為自己是在「討債」，這一刻才發現：<span class="hl">這筆帳是雙向的，今生搶來的，來世要加倍還。</span><br><br>
+  趙璧說：「咱們身邊俱有點銀兩，可以做個小生意，度活時日，趁此機會，改邪歸正，你們意下如何？」<br>朱九把刀拋進亂草：「大哥之言有理，我們就此收心罷。」<br><br>
+  <span class="em">你在自己最餓的時候，度了十三個強盜。</span>十多年後，他們會再來找你。`,
+  src:`「邱長春這些話，說得他們一十三人<span class="em">毛髮悚然</span>。」<br>趙璧又對長春曰：「老師傅好好修行，咱們弟兄，少不得後來都要拜你為師，習學妙道也。」`,
+  d:{will:+10,prog:+6,big:9,small:24,mercy:2}},
+ {t:"收下銀兩，找間廟住下來，招個徒弟，好好過日子。",kind:"bad",
+  res:`十幾兩銀子夠你安穩幾年。幾年後你成了一間小廟的當家，香火不旺不衰，人稱一聲師父。<br><span class="em">你沒有餓死，你只是不再修了。</span>`,
+  d:{heart:-15}},
+ {t:"罵他們是強盜，不受賊贓。",kind:"mid",
+  res:`你守住了戒，卻關上了門。<br>十三個本可回頭的人，被你一句話推了回去。<br><span class="em">戒律是拿來律己的，不是拿來斷人善根的。</span>`,
+  d:{will:-15,prog:+2,big:9,small:24,mercy:-1}}
+]},
+
+ev9:{ch:3,art:"chain",title:"事件九　鐵鍊鎖樹",
+scene:`魔根猶在，你仍要求死。<br><br>你化了一個多月的緣，湊了二百錢，買了一條鐵鍊、一把鐵鎖，找了個深山密林——沒有廟宇、不通路徑、人跡不到之處，把鍊子拴在大樹上，套在自己頸上鎖死，<span class="hl">再把鑰匙往空中拋去</span>，不知落在何處。<br><br>這一回，再沒有人救得了你了。<br><br>忽然來了個採藥人，問你：「老師傅身犯何罪？是誰把你鎖在樹上？」<br>你把賽麻衣的話、幾次求死遇救的事，全說了一遍。`,
+ask:"化身採藥人的太白星君，究竟跟你說了什麼？",
+opts:[
+ {t:"「三種人算命算不準：大善人、大惡人、修道人。」",kind:"ok",
+  res:`這一席話說得你如夢初醒、似暗忽明。<br>你急著要脫鎖，卻沒有鑰匙——採藥人從袖裡取出：「<span class="em">鑰匙是我拾得。</span>」<br><br>你叩謝大恩，他卻說：「我不過幾句言語勸解於你。信也由你，不信也由你。<span class="em">生死二字由你自造，於我何涉？</span>」<br>說罷飄然而去，霎時不見。`,
+  src:`「<span class="em">愚哉愚哉！執迷之甚！</span>我怕你有甚麼憂天愁地之事，卻原一念入魔，自誤終身。<br><br><span class="em">相定終身，只定得尋常之人</span>；若大善之人，相也定不準；大惡之人，相也定不準。<br>相分內外，有<span class="em">心相</span>，有<span class="em">面相</span>，<span class="em">外相不及內相，命好不如心好</span>。<br>人善之人<span class="em">相隨心變</span>，心好相亦好，該死者反得長壽，逢凶化吉，遇難呈祥。<br><br><span class="em">該貧賤而轉富貴者，因他心存濟世；該富貴而反貧賤者，由其意在利己；</span><br><span class="em">該餓死而反吃用不盡者，因他愛惜米糧；該吃用有餘而反受飢餓者，因他拋撒五穀。</span><br><br>此<span class="em">心相</span>之大略也，面相何能為哉！<br>況你們修道之人，<span class="em">能斡旋造化，扭轉乾坤</span>，把一個凡體都要修成神仙，未必神仙是相上註定的麼？<br>只要你能修成神仙地位，<span class="em">那一個神仙餓得死？</span><br>若你這樣所為，生不免為餓殍，死不免為餓鬼，<span class="em">生既無用，死又何益哉！</span>」`,
+  d:{will:+20,heart:+45,prog:+10,big:5,small:13,demon:-1}},
+ {t:"「你命該餓死，這是天意，早死早超生。」",kind:"bad",
+  res:`你聽信了，也真的死了。<br>這一段沒有下文——因為歷史上沒有第二個邱長春。`,
+  d:{will:-100}},
+ {t:"「我幫你打開鎖，你回去好好吃飯，別修了。」",kind:"bad",
+  res:`你活了下來，卻是以放棄修行為代價。<br>命保住了，運沒有轉。`,
+  d:{heart:-100}}
+]},
+
+ev10:{ch:3,art:"river",title:"事件十　蟠溪六年",
+scene:`太白星君指破迷途後，你重立玄功、再下苦行。<br><br>走到一個地方，山川毓秀，一道溪河橫於路旁。正值夏日水漲，河面平坦造不成橋、架不了船，只能涉水而過。近處鄉人熟知水性不當回事，<span class="hl">遠方過客卻只能臨流嘆息</span>。<br><br>夜裡你宿在冷廟，抬頭看見匾額上寫著「<span class="hl">蟠溪</span>眾姓弟子敬獻」——<br>你猛然想起師父臨終那句「<span class="em">石番溪邊苦根盡</span>」。<br><br>苦根要盡，就盡在這裡了。`,
+ask:"這六年，你決定怎麼過？",
+opts:[
+ {t:"背人渡水。有不能涉水的，我便背他過河；水枯時就去化齋濟眾，自己餓著。",kind:"ok",
+  res:`你在河邊住了六年。<br><br>水漲的時候背人過河，來一個背一個，有人給你幾文錢買飯吃，也有人分文不取，你照樣背他過去。水枯的時候出去化齋，早化七家、晚化八家，化來的先給路上飢寒之人，自己餓一頓也不覺得怎麼樣。若遇雨隔雪阻，竟日不吃。<br><br>前前後後這幾年，<span class="hl">大餓湊足了七十二次，小餓已經數不清了</span>。<br><br>這天你在冷廟裡打坐，忽然覺得身上有什麼東西鬆了——不是餓，也不是冷，是那個從賽麻衣口中聽來、跟了你半輩子的東西。<br><br><span class="em">苦根盡處，就是了道之時。</span><br><br>六年下來，<span class="hl">意志如鐵石，道心堅固，修行圓滿</span>——<span class="em">三項俱足，功行至此已無虧欠。</span>`,
+  src:`「有不能涉水者便把他背過河去……<span class="em">又有些人分文不取，也背他過去</span>。」<br>「化得齋來，<span class="em">或遇有飢寒之人便給與他吃，自己卻餓一頓</span>。若遇雨隔雪阻，<span class="em">竟日不吃</span>。」<br>「前前後後數年之間，餓得有百餘回。故如今有云：<span class="em">大餓七十二回，小餓無數</span>之言。」`,
+  d:{mercy:3,setWill:100,setHeart:100,setProg:100,setBig:72,setSmall:200}},
+ {t:"專心閉關打坐，不與外人接觸，把功夫坐出來。",kind:"bad",
+  res:`你坐了六年，功夫確實長了。<br>但師父說的是「<span class="em">苦根盡</span>」，不是「坐功成」。<br><br>苦根要在人群裡磨——要在餓著肚子還把飯讓給別人的時候磨，要在背陌生人過河卻分文不取的時候磨。你把自己關起來，磨的只有蒲團。<br><br>六年後你出關，相沒有變，命也沒有轉。<br><span class="em">你修的是自己的清靜，不是眾生的苦。</span>`,
+  d:{heart:-15}},
+ {t:"到別處另尋機緣，這種苦日子撐不了六年。",kind:"bad",
+  res:`你離開了蟠溪。<br>師父臨終那句話，你聽見了，卻沒有走到。<br><br><span class="em">不到苦之極處，苦根不盡，智慧難開。</span>`,
+  d:{heart:-15}}
+]}
+};
+
+/* =======================================================================
+   插頁：討論題（TALK）與敘事（STORY）
+   ======================================================================= */
+const TALKS = {
+talk1:{ch:2,art:"teach",kicker:"問題與討論",title:"祖師為什麼這麼嚴格？",
+lead:`一路挨罵、被摔飯、代眾受責——祖師對誰都沒有這樣。<br>停下來想一想：`,
+qs:[
+ "為什麼王重陽祖師要對邱長春大仙這麼嚴格？",
+ "如果今天換作是我們，不受上方、同修、家人、身邊朋友的肯定，你又該怎麼做？"
+],
+reveals:[
+ `王祖知道這個弟子<span class="em">苦業深重</span>，為了幫他消消業障，唯恐他的業力妨礙修行之路而不能克終，<span class="em">可謂用心良苦</span>。<br><br>師者，傳道、授業、解惑也。每一個人都是獨立的個體，人生來世間各帶有業力不同，所以上方點傳就要<span class="em">因材施教</span>，諄諄教誨，循循善誘。`,
+ `郝太古大仙慈悲聖訓：<br><span class="em">「天仙狀元，在面對吾師之拒絕時，能夠更深一層的省思，此乃我一番之造就也。」</span><br><br>不被肯定的時候，一般人問的是「他為什麼不喜歡我」；<br>邱大仙問的是「<span class="em">他要我學什麼</span>」。<br>——這一問之差，就是天仙狀元與尋常人的分別。`
+],
+tap:"點一下　顯示參考開示"},
+
+talk2:{ch:3,art:"mind",kicker:"問題與討論",title:"為什麼修道人可以改變命運？",
+lead:`太白星君說：三種人算命算不準——大善人、大惡人、修道人。<br>可是為什麼「修道人」也在裡面？`,
+qs:["為什麼修道人可以改變命運？"],
+reveals:[
+ `因為修道人<span class="em">行大善人之事</span>，同時又<span class="em">勉勵自己莫有大惡人之為</span>。`,
+ `<span class="em">相由心生</span>——思維改變了，便改變心態；接著又改了習慣，最後行為也跟著改了。<br>這非是什麼玄學，<span class="em">而是由內而外之改變</span>。`
+],
+tap:"點一下　文字浮現"}
+};
+
+const STORIES = {
+story1:{ch:2,art:"coffin",kicker:"敘事",title:"師父羽化・臨終遺言",
+d:{will:+5,heart:+5,prog:+5,small:5},
+pages:[`__WILLS__`],
+wills:[
+ ["孫不二","道果將熟，不必掛念。"],
+ ["馬丹陽","付與《韜光集》，主持家園；「只有邱長春功行尚少，汝當指示一二。」"],
+ ["劉長生","色相未能盡空，另有一番波濤。"],
+ ["郝太古","東遊西返，所見之處，即了道之地。"],
+ ["譚長真","遇顧而通玄。"],
+ ["王玉陽","逢姚以入妙。"],
+ ["邱長春","<b>石番溪邊苦根盡，龍飛門上大丹成。</b>"]
+]}
+};
+
+/* 全流程順序 */
+const FLOW=["ev1","ev2","ev3","ev4","ev5","talk1","story1","ev6","ev7","ev8","ev9","talk2","ev10"];
+
+/* ---------- 特殊事件 ---------- */
+const SPECIAL={
+art:"special",
+title:"捨己從人",
+scene:`這年溪水大漲。<br><br>來了三個人，<span class="hl">軍裝打扮，各帶鋼刀，手提人頭</span>，自稱斬獲大盜要上省報銷，不識水性，要你背他們過河。<br><br>你本是來下苦功的，焉有不背之理。一個、兩個，都平安過了。<br>第三位軍爺膽子最小，戰戰兢兢：「我生平畏水，你要小心。」<br><br>背到河中間水緊之處，<span class="hl">忽一浪打來</span>——你立腳未穩，身子一閃，那軍爺在背上叫了聲「不好」，急伸手抓你衣服，<span class="hl">一轉手，人頭墜入水中</span>。<br><br>洪水滔滔，波浪滾滾，那顆首級隨波逐浪而去。<br>軍爺在岸上捶胸頓足、喊天叫地。`,
+ask:"你怎麼做？",
+opts:[
+ "「人頭是他自己失手掉的，與我無干。」",
+ "「你拿刀來，把我這顆首級割下，以償你那個人頭。」",
+ "「我賠你錢，我去化緣賠到夠為止。」"
+],
+res:[
+ "✕　你說的是實話。三官大帝來考的，從來不是實話。六年苦行到此為止——你成了一個很會吃苦、卻捨不得自己的修行人。",
+ "○　正解。你接刀在手，正要自刎，忽聞半空有人叫道：「邱長春，還我笏來！」三官大帝現身：「汝果然捨己從人、積功累行。」手中哪裡是鋼刀，分明是一片朝笏。",
+ "△　軍爺要的不是錢。你的六年苦功、你背過的每一個人，全都在等這一刻——等你把「己」放下。"
+]};
+
+/* =======================================================================
+   狀態
+   ======================================================================= */
+const S={
+  will:70, heart:10, prog:0,
+  big:0, small:0, mercy:0, demon:0,
+  cur:"ev1", ch:1, save:null, rv:0
+};
+function changePct(){ return clamp(Math.round(S.big/BIG_HUNGER_MAX*100),0,100); }
+function snapshot(){
+  S.save={will:S.will,heart:S.heart,prog:S.prog,big:S.big,small:S.small,
+          mercy:S.mercy,demon:S.demon};
+}
+function restore(){ if(S.save) Object.assign(S,S.save); }
+const app=document.getElementById("app");
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+/* =======================================================================
+   狀態列
+   ======================================================================= */
+function hud(){
+  const chg=changePct(), done=chg>=100;
+  return `
+  <div id="hud">
+    <div class="hud-top"><span>${CH[S.ch]?CH[S.ch].name:""}</span><span>邱處機　字啟發</span></div>
+    <div class="bars">
+      ${bar("意志力",S.will,"f-will",S.will<30)}
+      ${bar("修道心",S.heart,"f-heart",S.heart<=20)}
+      ${bar("修行進度",S.prog,"f-prog",false)}
+    </div>
+    <div class="traits">
+      <span class="trait">特性一　命苦之人</span>
+      <span class="trait ${done?'done':''}">特性二　騰蛇鎖口${done?'・已改':''}<span class="sep">｜</span>大餓 <b>${S.big}/${BIG_HUNGER_MAX}</b> 次<span class="sep">｜</span>小餓 <b>${S.small}</b> 次<span class="sep">｜</span>改變進度 <b>${chg}%</b></span>
+      ${S.demon?'<span class="trait demon">一念入魔・修道心鎖定</span>':''}
+    </div>
+  </div>`;
+}
+function bar(name,val,cls,danger){
+  const v=clamp(Math.round(val),0,100);
+  return `<div class="bar-row">
+    <span class="bar-name">${name}</span>
+    <span class="bar-track"><span class="bar-fill ${cls} ${danger?'danger':''}" style="width:${v}%"></span></span>
+    <span class="bar-val">${v}%</span>
+  </div>`;
+}
+
+/* =======================================================================
+   數值結算
+   ======================================================================= */
+const LBL={will:"意志力",heart:"修道心",prog:"修行進度"};
+
+function applyDelta(d){
+  const out=[];
+  if(!d)return out;
+  if(d.demon===-1) S.demon=0;
+  const chgBefore=changePct();
+  for(const k of ["will","heart","prog"]){
+    if(d[k]===undefined)continue;
+    if(k==="heart"&&S.demon&&d[k]>0)continue;
+    const before=S[k];
+    S[k]=clamp(S[k]+d[k],0,100);
+    const real=S[k]-before;
+    out.push({k,v:real!==0?real:d[k],unit:"%"});
+  }
+  if(d.setWill!==undefined){
+    const b=S.will; S.will=d.setWill;
+    if(S.will!==b) out.push({k:"will",v:S.will-b,unit:"%"});
+  }
+  if(d.setHeart!==undefined){
+    const b=S.heart; S.heart=d.setHeart;
+    if(S.heart!==b) out.push({k:"heart",v:S.heart-b,unit:"%"});
+  }
+  if(d.setProg!==undefined){
+    const b=S.prog; S.prog=d.setProg;
+    if(S.prog!==b) out.push({k:"prog",v:S.prog-b,unit:"%"});
+  }
+  if(d.setSmall!==undefined){
+    const b=S.small; S.small=d.setSmall;
+    if(S.small!==b) out.push({k:"small",v:S.small-b,unit:"次"});
+  }
+  if(d.big){ const b=S.big; S.big=clamp(S.big+d.big,0,BIG_HUNGER_MAX);
+             if(S.big!==b) out.push({k:"big",v:S.big-b,unit:"次"}); }
+  if(d.setBig!==undefined){ const b=S.big; S.big=d.setBig;
+             if(S.big!==b) out.push({k:"big",v:S.big-b,unit:"次"}); }
+  if(d.small){ S.small+=d.small; out.push({k:"small",v:d.small,unit:"次"}); }
+  const chgAfter=changePct();
+  if(chgAfter!==chgBefore) out.push({k:"change",v:chgAfter-chgBefore,unit:"%"});
+  if(d.mercy) S.mercy+=d.mercy;
+  if(d.demon===1){ S.demon=1; S.heart=10; }
+  return out;
+}
+
+function deltaHTML(list){
+  if(!list.length)return "";
+  return `<div class="delta">${list.map(x=>{
+    let name, cls;
+    if(x.k==="big"){ name="大餓"; cls="hunger"; }
+    else if(x.k==="small"){ name="小餓"; cls="hunger"; }
+    else if(x.k==="change"){ name="改變進度"; cls="info"; }
+    else { name=LBL[x.k]; cls=x.v>0?"up":"down"; }
+    return `<span class="d ${cls}">${name} ${x.v>0?"+":""}${x.v}${x.unit}</span>`;
+  }).join("")}</div>`;
+}
+
+function hungerBonus(){
+  if(S.demon)return "";
+  if(Math.random()<0.5){
+    const before=S.heart; S.heart=clamp(S.heart+5,0,100);
+    if(S.heart>before)
+      return `<div class="curse good"><b>飢餓中堅定了修道心</b>　餓到極處，反而想清楚一件事：這身皮囊要不到的，正是我要修的。<br>修道心 +${S.heart-before}%</div>`;
+  }
+  return "";
+}
+function curse(){
+  if(Math.random()>=CURSE_TRIGGER) return {type:"none"};
+  if(Math.random()<CURSE_FATAL)    return {type:"fail"};
+  const before=S.will; S.will=clamp(S.will-10,0,100);
+  return {type:"drain",amount:before-S.will};
+}
+function curseHTML(c){
+  if(c.type==="drain")
+    return `<div class="curse"><b>特性一・命苦之人發作</b>　苦根重，路途不如意——即使選對了，也走得比別人辛苦。<br>意志力 −${c.amount}%</div>`;
+  return "";
+}
+function checkFail(){
+  if(S.will<20) return "意志力低於 20%，道心破裂，無法修行。";
+  if(!S.demon && S.heart<=9) return "修道心已降至 10% 以下，從此對修行之路無興趣。";
+  return null;
+}
+
+/* =======================================================================
+   畫面
+   ======================================================================= */
+function go(html){ app.innerHTML=html; window.scrollTo(0,0); }
+function toast(msg,ms){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.style.display="block";
+  clearTimeout(t._h); t._h=setTimeout(()=>{t.style.display="none";}, ms||2600);
+}
+
+function screenTitle(){
+  go(`
+  <div style="height:8vh"></div>
+  <div class="center">
+    <h1 style="font-size:clamp(28px,7.4vw,52px)">邱長春大仙行誼</h1>
+    <div class="sub" style="margin-top:10px">模　擬　互　動</div>
+  </div>
+  ${ART.cover}
+  <div class="rule"></div>
+  <div class="card">
+    <p>邱長春大仙問大家：</p>
+    <div class="quote">「問賢士們，你相信<span class="em">命運</span>呢？還是相信<span class="em">運命</span>呢？」</div>
+    <p>康熙字典的解釋是：<span class="em">命也，不可改；運也，可以轉。</span></p>
+    <p>沒有修行的人，很容易隨既有的業力運轉而走完一生，這就是被「命」所「運」；<br>
+    以大修行者來說剛好顛倒，他能夠主宰及運用自己有限的生命，這就叫做「運命」。</p>
+    <div class="rule"></div>
+    <p class="small">你將扮演邱處機，用你的每一個選擇，走完他走過的路。</p>
+  </div>
+  <div class="center">
+    <button class="btn" onclick="screenIntro()">入　道</button><br>
+    <button class="btn ghost small-btn" onclick="downloadPPT()">下載成 PPT 講義</button>
+  </div>
+  `);
+}
+
+function screenIntro(){
+  go(`
+  <div class="card">
+    <h2>人物與生平</h2>
+    <p><span class="em" style="font-size:19px">邱長春大仙，原名邱處機，字啟發，號長春子。</span></p>
+    <p>南宋末年，山東登州府棲霞縣荳村人。<br>
+       弟兄三人，父母早喪，多蒙兄嫂看顧得以成人。<br>
+       讀過幾年書也能詩詞歌賦。</p>
+    <div class="rule"></div>
+    <p>他<span class="em">無心於功名</span>，一味好靜，常獨坐終日不與人言談。兄嫂屢勸他讀書求功名，他答：</p>
+    <div class="quote">「讀書原為窮理，<span class="em">豈希圖功名</span>！」</div>
+    <p>兄嫂又要與他議婚，他堅辭：</p>
+    <div class="quote">「男子未立，<span class="em">豈可以婚姻絆絏</span>。」</div>
+    <p>兄嫂聽他言語不凡，也不敢苦勸，由他自便。他常對人說：</p>
+    <div class="quote">「人生在世，苦不尋個出頭路徑，終日爭名奪利、貪妻戀子，無常一到，萬事皆空。<br>人以為世事皆真，於我視之如<span class="em">浮雲朝露、夢幻泡影</span>。」</div>
+    <div class="rule"></div>
+    <p><span class="em">十九歲</span>那年，他聽人說：寧海縣馬家庄有位<span class="em">王重陽先生</span>，廣有道德，是個大修行人。<br>
+    他不敢先稟兄嫂，只暗地收拾一點盤費、帶了幾件換洗衣服，<span class="em">悄悄離了家庭</span>，望寧海縣而來——</p>
+    <p class="small">那是一條要走四十年的路。而故事，就從他跪在祖師面前那一刻開始。</p>
+  </div>
+  <div class="card">
+    <h3>七　真</h3>
+    <p class="small">王重陽祖師門下，後世稱為北七真。</p>
+    <div class="seven">
+      <span class="me">邱長春</span><span>劉長生</span><span>譚長真</span><span>馬丹陽</span>
+      <span>郝太古</span><span>王玉陽</span><span>孫不二</span>
+    </div>
+  </div>
+  <div class="center"><button class="btn" onclick="screenTraits()">下一步</button></div>
+  `);
+}
+
+function screenTraits(){
+  go(`
+  <div class="card">
+    <h2>初始數值</h2>
+    <table class="tbl">
+      <tr><td>意志力</td><td><span class="em">70%／100%</span><br>
+        <span class="small">當意志力低於 20%，道心破裂，無法修行，判定模擬失敗。</span></td></tr>
+      <tr><td>修道心</td><td><span class="em">10%／100%</span><br>
+        <span class="small">每次事件可增加修道心，更加信任修行這條路。<br>如果事件決定錯誤，則會下降至 10% 以下，判定模擬失敗。</span></td></tr>
+      <tr><td>修行進度</td><td><span class="em">0%／100%</span><br>
+        <span class="small">隨著經歷事件之成功，可以增加修行進度，依照困難度有不同進度。<br>達到 100%，會經歷特殊事件。</span></td></tr>
+    </table>
+    <div class="rule"></div>
+    <p class="small"><b>圓滿條件</b>　通過特殊事件之後，<span class="em">意志力、修道心、修行進度三項都必須達到 100%</span>，才能圓滿成仙。</p>
+  </div>
+  <div class="card">
+    <h2>特性一　命苦之人</h2>
+    <p>苦根重，人生路途經常不如意、不順遂。</p>
+    <div class="rule"></div>
+    <p class="small"><b>特性應用</b>　遇到抉擇事件時：<br>
+      ・選擇錯誤 → 一律判定失敗。<br>
+      ・選擇不夠好的答案 → 消耗 <span class="em">15% 意志力</span>，劇情繼續。<br>
+      ・選擇正確 → 仍有 <span class="em">30% 機率觸發壞情況</span>：<br>
+      　　其中 <span class="em">30%</span> 直接判定失敗，該章重新選擇；<br>
+      　　其中 <span class="em">70%</span> 消耗 <span class="em">10% 意志力</span>，劇情繼續。</p>
+  </div>
+  <div class="card">
+    <h2>特性二　騰蛇鎖口</h2>
+    <p>福氣不足，為餓死之相，可經過修行改善。<br>目前<span class="em">改變進度 0%</span>。</p>
+    <div class="rule"></div>
+    <p class="small"><b>特性應用</b>　隨機觸發飢餓事件，分<span class="em">大餓</span>與<span class="em">小餓</span>兩種：<br>
+      ・<span class="em">大餓需經歷 72 次</span>，小餓需經歷無數次。<br>
+      ・改變進度 ＝ 大餓次數 ÷ 72，<span class="em">集滿 72 次大餓才能圓滿</span>。<br>
+      ・每次經歷飢餓事件，有機會觸發堅定修道心，使修道心增加。</p>
+  </div>
+  <div class="card">
+    <h2>章節</h2>
+    <p class="small">
+      第一章　學道拜師　　事件一～四<br>
+      第二章　麻衣論相　　事件五～六（含問題討論、師父遺言）<br>
+      第三章　相隨心變　　事件七～十（含問題討論）<br>
+      第四章　天仙狀元　　特殊事件通過之後<br><br>
+      <span class="em">模擬失敗時，回到該章開頭重新選擇一次</span>，數值回到該章開始時的狀態。</p>
+  </div>
+  <div class="center"><button class="btn" onclick="startGame()">開始模擬</button></div>
+  `);
+}
+
+function startGame(){
+  S.will=70;S.heart=10;S.prog=0;S.big=0;S.small=0;
+  S.mercy=0;S.demon=0;S.ch=1;S.cur="ev1";
+  snapshot(); render();
+}
+
+/* ---------- 派發 ---------- */
+function render(){
+  const id=S.cur;
+  if(EVENTS[id])  return screenEvent();
+  if(TALKS[id])   return screenTalk();
+  if(STORIES[id]) return screenStory(0);
+}
+
+function screenEvent(){
+  const ev=EVENTS[S.cur];
+  S.ch=ev.ch;
+  go(hud()+`
+  <div class="card">
+    <div class="ch-label">${CH[ev.ch].name}</div>
+    <h2>${ev.title}</h2>
+    ${ev.art?ART[ev.art]:""}
+    <div class="scene">${ev.scene}</div>
+    <div class="ask">${ev.ask}</div>
+    <div class="opts">
+      ${ev.opts.map((o,i)=>`<button class="opt" onclick="choose(${i})"><span class="num">${i+1}.</span><span>${o.t}</span></button>`).join("")}
+    </div>
+  </div>`);
+}
+
+function choose(i){
+  const ev=EVENTS[S.cur], o=ev.opts[i];
+  let curseRes={type:"none"};
+  if(o.kind==="ok") curseRes=curse();
+
+  if(curseRes.type==="fail"){
+    return screenFail(null,`
+    <div class="card result">
+      <div class="ch-label">${ev.title}　你的選擇</div>
+      <p style="color:var(--paper2);font-size:15px">${i+1}. ${o.t}</p>
+      <div class="rule"></div>
+      <div class="verdict v-bad">✕　選擇正確，卻走不過去</div>
+      <div class="scene">你選對了，但<span class="em">命苦之人</span>的苦根在這裡發作了。<br>
+      人生路途不如意、不順遂——這一次，連做對的事都出了岔子。</div>
+      <div class="curse"><b>特性一・命苦之人</b>　選擇正確，仍觸發壞情況並判定失敗。</div>
+    </div>`);
+  }
+
+  const chgBefore=changePct();
+  const list=applyDelta(o.d);
+  let bonus="";
+  if(o.d && (o.d.big || o.d.small || o.d.setBig!==undefined)) bonus=hungerBonus();
+
+  const vcls=o.kind==="ok"?"v-ok":(o.kind==="mid"?"v-mid":"v-bad");
+  const vtxt=o.kind==="ok"?"○　可以走下去":(o.kind==="mid"?"△　走得下去，但付出了代價":"✕　模擬失敗");
+  const chgNow=changePct();
+
+  const body=`
+  <div class="card result">
+    <div class="ch-label">${ev.title}　你的選擇</div>
+    <p style="color:var(--paper2);font-size:15px">${i+1}. ${o.t}</p>
+    <div class="rule"></div>
+    <div class="verdict ${vcls}">${vtxt}</div>
+    <div class="scene">${o.res}</div>
+    ${o.src?`<div class="src"><span class="tag">七真史傳・原文</span>${o.src}</div>`:""}
+    ${deltaHTML(list)}
+    ${curseHTML(curseRes)}
+    ${bonus}
+    ${(chgNow>=100&&chgBefore<100)?`<div class="curse shine"><b>大餓已滿七十二次，改變進度 100%</b>　特性二・騰蛇鎖口——這個餓死之相，已經改過來了。</div>`:""}
+  </div>`;
+
+  if(o.kind==="bad") return screenFail(null,body);
+  const fail=checkFail();
+  if(fail) return screenFail(fail,body);
+
+  go(hud()+body+`<div class="center"><button class="btn" onclick="next()">繼　續</button></div>`);
+}
+
+/* ---------- 討論頁 ---------- */
+function screenTalk(){
+  const t=TALKS[S.cur];
+  S.ch=t.ch; S.rv=0;
+  go(hud()+`
+  <div class="card">
+    <div class="ch-label">${t.kicker}</div>
+    <h2>${t.title}</h2>
+    ${t.art?ART[t.art]:""}
+    <div class="scene">${t.lead}</div>
+    ${t.qs.map((q,i)=>`<div class="qbox"><div class="qnum">問題 ${i+1}</div><div class="qtext">${q}</div></div>`).join("")}
+    <div id="rvwrap">
+      ${t.reveals.map((r,i)=>`<div class="ans reveal" id="rv${i}">${r}</div>`).join("")}
+    </div>
+    <div class="tap" id="tapbtn" onclick="revealNext()">${t.tap}</div>
+  </div>
+  <div class="center"><button class="btn" onclick="next()">繼　續</button></div>`);
+}
+
+function revealNext(){
+  const t=TALKS[S.cur];
+  if(!t) return;
+  const el=document.getElementById("rv"+S.rv);
+  if(el){ el.classList.add("show"); S.rv++; }
+  if(S.rv>=t.reveals.length){
+    const b=document.getElementById("tapbtn");
+    if(b){ b.style.display="none"; }
+  }
+}
+
+/* ---------- 敘事頁 ---------- */
+function screenStory(page){
+  const st=STORIES[S.cur];
+  S.ch=st.ch;
+  const total=st.pages.length;
+  let html=st.pages[page];
+  if(html==="__WILLS__"){
+    html=`祖師逐一囑咐門下七人——<table class="wills">`+
+      st.wills.map(w=>`<tr class="${w[0]==="邱長春"?"me":""}"><td>${w[0]}</td><td>${w[1]}</td></tr>`).join("")+
+      `</table><p class="small">七真之中，只有邱長春得到的是一句<span class="em">預言</span>：苦根要在蟠溪盡，大丹要在龍門成。<br>那時他還不知道蟠溪在哪裡、龍門是什麼。</p>`;
+  }
+  const last=page>=total-1;
+  go(hud()+`
+  <div class="card">
+    <div class="ch-label">${st.kicker}　${page+1} / ${total}</div>
+    <h2>${st.title}</h2>
+    ${(page===0&&st.art)?ART[st.art]:""}
+    <div class="scene">${html}</div>
+  </div>
+  <div class="center">
+    ${page>0?`<button class="btn ghost small-btn" onclick="screenStory(${page-1})">上一頁</button>`:""}
+    <button class="btn" onclick="${last?"storyDone()":"screenStory("+(page+1)+")"}">${last?"繼　續":"下一頁"}</button>
+  </div>`);
+}
+
+function storyDone(){
+  const st=STORIES[S.cur];
+  const list=applyDelta(st.d);
+  const bonus=(st.d&&st.d.small)?hungerBonus():"";
+  go(hud()+`
+  <div class="card result">
+    <div class="ch-label">${st.title}</div>
+    <div class="verdict v-ok">○　送師西歸，大事已畢</div>
+    <div class="scene">師父留下的那句「石番溪邊苦根盡，龍飛門上大丹成」，你記在心裡。<br>接下來的路，要一個人走了。</div>
+    ${deltaHTML(list)}
+    ${bonus}
+  </div>
+  <div class="center"><button class="btn" onclick="next()">繼　續</button></div>`);
+}
+
+/* ---------- 流程推進 ---------- */
+function chOf(id){
+  return (EVENTS[id]||TALKS[id]||STORIES[id]).ch;
+}
+function next(){
+  if(S.cur==="ev10") return screenSpecial();
+  const nxt=FLOW[FLOW.indexOf(S.cur)+1];
+  S.cur=nxt;
+  if(chOf(nxt)!==S.ch){ S.ch=chOf(nxt); snapshot(); return screenChapter(); }
+  render();
+}
+function screenChapter(){
+  go(`<div style="height:16vh"></div>
+  <div class="center">
+    <div class="sub">第 ${S.ch} 章</div>
+    <h1 style="font-size:clamp(26px,7vw,44px)">${CH[S.ch].name.replace(/^第.章　/,"")}</h1>
+  </div>
+  <div class="center" style="margin-top:26px"><button class="btn" onclick="render()">繼　續</button></div>`);
+}
+
+/* ---------- 特殊事件 ---------- */
+function specialReady(){ return S.will>=100 && S.heart>=100 && S.prog>=100; }
+
+function screenSpecial(){
+  const rd=specialReady();
+  go(hud()+`
+  <div class="card">
+    <div class="ch-label">★　特　殊　事　件</div>
+    <div class="${rd?'curse shine':'curse'}" style="margin-top:0">
+      <b>圓滿條件</b>　意志力 ${S.will}%　｜　修道心 ${S.heart}%　｜　修行進度 ${S.prog}%　｜　大餓 ${S.big}/${BIG_HUNGER_MAX} 次
+      <br>${rd?"三項俱滿，苦根盡除——可以受最後一考了。":"三項須全數達到 100% 方能圓滿成仙。"}
+    </div>
+    <h2>${SPECIAL.title}</h2>
+    ${SPECIAL.art?ART[SPECIAL.art]:""}
+    <div class="scene">${SPECIAL.scene}</div>
+    <div class="ask">${SPECIAL.ask}</div>
+    <div class="opts">
+      ${SPECIAL.opts.map((t,i)=>`<button class="opt" onclick="special(${i})"><span class="num">${i+1}.</span><span>${t}</span></button>`).join("")}
+    </div>
+  </div>`);
+}
+
+function special(i){
+  if(i===0){
+    return screenFail(null,`
+    <div class="card result">
+      <div class="verdict v-bad">✕　特殊事件失敗</div>
+      <div class="scene">你說的是實話。<br><span class="em">三官大帝來考的，從來不是實話。</span><br><br>
+      六年苦行到此為止——你成了一個很會吃苦、卻捨不得自己的修行人。</div>
+    </div>`);
+  }
+  if(i===2){
+    if(S.mercy>=5){
+      return go(hud()+`
+      <div class="card result">
+        <div class="verdict v-mid">△　考題還在原地</div>
+        <div class="scene">軍爺要的不是錢。<br><br>
+        你的六年苦功、你背過的每一個人，全都在等這一刻——<span class="em">等你把「己」放下</span>。<br>
+        你用錢繞過去了，考題就還在原地。<br><br>
+        <span class="small">（這一路你捨己為人累積下來的功夫，足夠讓你再想一次。）</span></div>
+      </div>
+      <div class="center"><button class="btn" onclick="screenSpecial()">再　想　一　次</button></div>`);
+    }
+    return screenFail(null,`
+    <div class="card result">
+      <div class="verdict v-bad">✕　特殊事件失敗</div>
+      <div class="scene">軍爺要的不是錢。<br>你的六年苦功全都在等這一刻——等你把「己」放下。<br><br>
+      <span class="small">（這一路你捨己為人的功夫累積得不夠，撐不住你再想一次。）</span></div>
+    </div>`);
+  }
+  if(!specialReady()){
+    return screenFail(
+      `功行未圓滿——意志力 ${S.will}%、修道心 ${S.heart}%、修行進度 ${S.prog}%，三項須全數達到 100% 才能圓滿成仙。`,
+      `<div class="card result">
+        <div class="verdict v-mid">△　捨己從人，然功行未足</div>
+        <div class="scene">你確實把「己」放下了，三官大帝也看見了。<br>
+        只是<span class="em">六年苦行還有虧欠之處</span>——道果未熟，此時成仙，反成夾生。</div>
+      </div>`);
+  }
+  S.prog=100; S.big=BIG_HUNGER_MAX;
+  go(hud()+`
+  <div class="card result">
+    <div class="verdict v-ok">○　特殊事件通過</div>
+    <div class="scene">
+      你接刀在手，正要自刎——<br>
+      忽聞半空中有人叫道：「<span class="hl">邱長春，還我笏來！</span>」<br><br>
+      抬頭一看，三位軍爺站在五色祥雲之內。<br><br>
+      你心頭朗悟，靈機顯著。再看手中——<span class="em">哪裡是甚麼鋼刀，分明是一片朝笏</span>。
+    </div>
+    <div class="src"><span class="tag">七真史傳・原文</span>
+      長春曰：「<span class="em">我是孤身一人，死有餘辜；你乃數口之家賴此生活。以我一人活你全家，未為不可？</span>」<br>
+      軍爺曰：「常言鋼刀雖快，不斬無罪之人。你若要周全我的大事，<span class="em">只可自裁</span>。」<br><br>
+      三官大帝曰：「<span class="em">吾等三人乃天地水三官也。因見你道心堅固、苦行圓滿，特來化度於汝。汝果然捨己從人、積功累行，今將汝凡身化作道身、幻體更為仙體。六年悟道已就，七載成真將興，汝可精進勿誤。</span>」
+    </div>
+  </div>
+  <div class="center"><button class="btn" onclick="screenCh4()">圓　滿</button></div>`);
+}
+
+function screenCh4(){
+  S.ch=4;
+  go(`<div style="height:16vh"></div>
+  <div class="center">
+    <div class="sub">第 4 章</div>
+    <h1 style="font-size:clamp(26px,7vw,44px)">天仙狀元</h1>
+  </div>
+  <div class="center" style="margin-top:26px"><button class="btn" onclick="ending(0)">繼　續</button></div>`);
+}
+
+/* ---------- 失敗 ---------- */
+function screenFail(reason,body){
+  const chName=CH[S.ch].name;
+  const startId=CH[S.ch].start;
+  const startTitle=startId?((EVENTS[startId]||TALKS[startId]||STORIES[startId]).title):"";
+  go(`
+  <div class="fail-mark">模 擬 失 敗</div>
+  ${body||""}
+  ${reason?`<div class="card"><p class="red">${reason}</p></div>`:""}
+  <div class="card center">
+    <p class="small">回到<span class="em">${chName}</span>開頭，重新選擇一次。<br>
+    數值回到該章開始時的狀態。<br>
+    <span class="em">${startTitle}</span></p>
+    <div style="margin-top:14px">
+      <button class="btn" onclick="retryChapter()">重新選擇</button>
+      <button class="btn ghost" onclick="screenTitle()">回到開頭</button>
+    </div>
+  </div>`);
+}
+function retryChapter(){
+  restore();
+  S.cur=CH[S.ch].start || "ev7";
+  render();
+}
+
+/* =======================================================================
+   結局
+   ======================================================================= */
+const ENDINGS=[
+{step:"結局・其一",title:"苦根盡・相隨心變",html:`
+<div class="scene">
+道果既成，你動了一點心思：飛回河東，去見那位賽麻衣。<br><br>
+他替你重相一次，拍手大笑——
+</div>
+<div class="src"><span class="tag">賽麻衣</span>
+「<span class="em">妙哉妙哉！道長不知在何處做下大功德事，竟將昔年之相改變了。</span><br><br>
+昔者雙紋入口，是名螣蛇鎖口，應主餓死；如今這兩條紋路雙分出來，繞於承漿之位，承漿上又生了一個小小紅痣，配成格局，名曰<span class="em">二龍戲珠</span>，貴不可言，應受帝王供養，福德不可量也。<br><br>
+<span class="em">老朽只知相面，不知相心。今道長相隨心變，非老朽所知也。</span>」
+</div>
+<div class="curse good"><b>特性二解除</b>　騰蛇鎖口 → 二龍戲珠　　大餓七十二次受盡，餓死之相已改。</div>`},
+
+{step:"結局・其二",title:"陰魔盡退",html:`
+<div class="scene">
+只是這一點「取笑於人」的心，又惹出一場陰魔。<br><br>
+回蟠溪打坐時，幻境一個接一個襲來：猛虎撲面、師兄來訪、有人送來一石麥子兩串銅錢、美貌女子哭訴身世、二嫂帶著孩子拉扯著喊三叔——<br><br>
+最後是二童子牽著白鶴，說「奉玉敕請真人跨鶴飛昇」。<br><br>
+你想起三官大帝說的是「<span class="em">七載成真將興</span>」，哪有今朝飛昇之理？<br><br>
+這一念醒悟，童子與白鶴俱散，你獨自坐在半邊蒲團上，窗外星月交輝、萬籟無聲。<br><br>
+此後你尋一座土山結草為庵，坡下有塊百斤圓石——陰魔一起，就去把石頭推上半坡再讓它滾下來，然後回來靜坐。<br>
+<span class="em">如此三年，陰魔盡退，遍體純陽。</span>
+</div>`},
+
+{step:"結局・其三",title:"龍飛門上大丹成",html:`
+<div class="scene">
+你入隴州山中，見一石壁臨溪，壁上有洞，其洞如門，時人取名<span class="hl">龍門</span>——<br>
+師父那句「<span class="em">龍飛門上大丹成</span>」，應在此處。<br><br>
+在龍門洞養性修真不到兩年，隴州大旱，太守率郡民祈禱無雨。<br>
+你嚴整衣冠、俯伏壇庭，<span class="em">一念投忱，誠通上帝</span>，果然滂沱大降，下了三日三夜，萬民遂安。<br><br>
+隔年北直一帶大旱，天子張榜求道，隴州太守保舉你入京。<br>
+你登壇三日，以楊枝醮淨水向紅日灑去，日邊生出一段黑氣、倏變為雲，大雨如注。<br><br>
+元順帝封你為<span class="em">宏道真人</span>，留居京師，待以上賓之禮。
+</div>`},
+
+{step:"結局・其四",title:"數理不如天理",html:`
+<div class="scene">
+你算定皇后所懷是龍胎，白雲禪師算定是鳳胎，兩人在御前立字打賭——他賭白雲寺，你賭項上首級。<br><br>
+你說：「<span class="em">數理不如天理，陰德有回天之力，善行有傲數之功。</span>」<br>
+皇上親自祈雨、普救萬民，這是陰德之大者，或者感動上天，轉女成男，亦未可知。<br><br>
+後來皇后果然生下女嬰，你卻在御前袍袖一掩，偷龍換鳳，贏了白雲寺。<br><br>
+皇后依禪師之計，賜你鴆酒三杯試你真假。你入宮前先備下二十四缸清水，飲畢連跳二十三缸，缸缸水熱；第二十四缸水未滿，毒火上沖，把天庭青絲髮沖落三指寬。
+</div>
+<div class="src"><span class="tag">皇后問你頭上為何無髮，你答</span>
+昨承丹詔赴瑤階，王母與臣賜宴來；<br>連飲三杯長壽酒，遂將頂上天門開。
+</div>
+<div class="scene">
+皇后又賜黃金一錠命你戴在頭上。你運三昧真火吹軟黃金，以鋼針挑髮插入金竅，穩穩戴住——
+</div>
+<div class="src"><span class="tag">你吟道</span>
+屢承丹詔頒恩深，臣敢將詩對主吟；<br><span class="em">君子心中無冷病，男兒頭上有黃金。</span><br>
+<span class="small">（道門黃冠之制，即始於此。）</span>
+</div>
+<div class="scene">
+白雲禪師從屏風後跳出來拉住你：「邱長春，也不是你自惹魔障，是老僧魔障於你！」<br>
+你卻說：「禪師乃四大皆空之人，焉有魔障於我？<span class="em">看來實是我自取其咎也。</span>」<br><br>
+<span class="em">貪迷世故戀塵囂，久戀塵囂魔自招；煩惱實由我自取，別人怎使我動搖。</span><br><br>
+兩人自此和好。元順帝賀曰：「一僧一道在京華，僧道原來是一家。」
+</div>`},
+
+{step:"結局・其五",title:"舊人來歸",html:`
+<div class="scene">
+你在白雲觀開壇演教、講說戒律，大開度世之門，重興全真之道，<span class="em">開叢林七十二座</span>。<br><br>
+一日，山門外來了十餘位高長大漢——是當年秦嶺山上救你一命的趙璧、王能、朱九他們。<br>
+他們早已改邪歸正做了雜貨生意，一混十餘年，聽說白雲觀有位邱大真人，特地找來拜師。
+</div>
+<div class="src"><span class="tag">你對他們說了自己這一路</span>
+「我當年幼失依怙，蒙兄長提拔成人，一心訪道修真，遇吾師重陽真人授以至道，又蒙師兄馬丹陽指撥。<br>
+自斜谷分單之後，深自勉勵，<span class="em">大餓七十二次，幾至殞命，小餓無數，苦難盡言</span>。<br>
+然而<span class="em">我心如鐵石，寧死不退初心，越受磨難，其志愈堅</span>。<br>
+後在蟠溪行苦工六年，其中困苦，曷可勝言！<br><br>
+<span class="em">不到苦之極處，苦根不盡，智慧難開。</span>」
+</div>`},
+
+{step:"結局・其六",title:"天仙狀元・好難學",html:`
+<div class="scene">
+三千功果、八百行滿，三十三天丹書下詔。<span class="hl">十月十九，跨鶴飛昇。</span><br><br>
+金闕之上，三官大帝上殿保舉七真，玉帝逐一敕封——
+</div>
+<div class="src" style="text-align:center">
+<span class="tag">敕　封</span>
+<span class="em" style="font-size:17px">邱長春——天仙狀元、紫府選仙、上品全真教主、神化明應主教真君</span><br><br>
+<span class="small">劉長生・玄靜蘊德真君　　譚長真・宗玄明德真君　　馬丹陽・無為普化真君<br>
+郝太古・通玄妙極真君　　王玉陽・廣慈普度真君　　孫不二・玄虛順化元君</span>
+</div>
+<div class="scene">
+六位同門都謝了恩。<span class="hl">只有你不肯謝恩。</span><br><br>
+三官大帝喊：「邱長春怎不謝恩？」<br><br>
+你俯伏玉階，涕淚交流：
+</div>
+<div class="src"><span class="tag">學好難本章</span>
+「非臣不謝恩，只緣<span class="em">道本難學，仙不易成</span>。後世修行學道之人，如臣受那百千萬苦而不退初心者，<span class="em">萬中難選一也</span>。<br><br>
+<span class="em">悟道不易，學好最難</span>，蓋學好之事，非大力量之人不能學也。<br>
+要能<span class="em">忍飢受餓，忍辱受恥</span>，有時衣不終身、食不終日，日斷兩餐、夜難一宿，<br>
+無日不惹人嫌厭，屢受凌辱，言之酸也，聽之寒膽。<br>
+臣經歷千般苦處，故知學好之為難也。一好字而難學，敢望仙乎！<br><br>
+臣恐天下後世修行悟道之人，不能如臣受苦受難，<span class="em">有學道之名，而無學道之實也</span>，使臣無從化度，有負吾皇榮封之恩，<span class="em">故臣不敢謝恩也</span>！伏乞赦罪。」
+</div>
+<div class="scene" style="text-align:center"><span class="em">群　仙　默　然。</span></div>
+<div class="scene">
+這時西大廳走出一位星君——赤髮赤面赤鬚赤心，金盔金甲金磚金鞭，人稱鐵面雷公、<span class="hl">先天靈祖</span>。<br>
+他聞聽此奏起了惻隱之心，願作護法之神，大聲喊道：
+</div>
+<div class="src"><span class="tag">先天靈祖</span>
+「<span class="em">邱長春，你只管謝恩！<br>後世若有修行之人、學道之士，他有三分修持，我有七分感應；<br>他有十分修持，我便隨時照臨，自有人辦齋造供，不使他忍飢受寒！</span>」
+</div>
+<div class="scene">
+你聽了才肯謝恩，又與星君作禮——<br>
+<span class="em">把一個幾千斤重的擔子，與星君擱在了肩頭上。</span><br><br>
+<span class="hl">大仙都已經成道了，還心繫著沒有得渡的眾生。</span>
+</div>`}
+];
+
+function ending(i){
+  if(i>=ENDINGS.length) return screenVow();
+  const e=ENDINGS[i];
+  go(`
+  ${i===0?'<div class="ending-title">圓 滿 成 仙</div>':''}
+  <div class="card">
+    <div class="ed-step">${e.step}</div>
+    <h2 style="text-align:center">${e.title}</h2>
+    <div class="rule"></div>
+    ${e.html}
+  </div>
+  <div class="center">
+    <button class="btn" onclick="ending(${i+1})">${i===ENDINGS.length-1?'回　向':'繼　續'}</button>
+  </div>`);
+}
+
+function screenVow(){
+  go(`
+  <div class="ending-title">回　向</div>
+  <div class="card">
+    <div class="vow">
+      邱長春大仙慈悲：<br><br>
+      <span class="em">「智者只知道改變方法，不改目標；<br>愚者常改變目標，而不改方法。」</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="vow">
+      邱長春大仙慈悲：<br><br>
+      <span class="em">「修道人要存大仁，去接受所不能改變的一切；<br>
+      存大勇，去改變所能改變的一切；<br>
+      存大智，去分辨兩者之間的差別；<br>
+      並且存大愿，使人人都有此自覺。」</span>
+    </div>
+  </div>
+  <div class="card center">
+    <h2 style="text-align:center">命也，不可改　運也，可以轉</h2>
+    <p>問賢士們——你是相信<span class="em">命運</span>，還是相信<span class="em">運命</span>？</p>
+    <div class="rule"></div>
+    <p class="small">本局紀錄：意志力 ${S.will}%　修道心 ${S.heart}%　修行進度 ${S.prog}%<br>
+    大餓 ${S.big} 次　小餓 ${S.small} 次　改變進度 ${changePct()}%</p>
+  </div>
+  <div class="center"><button class="btn" onclick="screenEpilogue()">結　語</button></div>`);
+}
+
+/* ---------- 結語 ---------- */
+const EPILOGUE=[
+ "莫言自己無才無能，輕視自我不如上方講師；",
+ "莫說自己無錢無知，藐視自我不如富貴能人。",
+ "",
+ "若說自己情況糟糕，不適合修道，且看邱長春大仙——",
+ "歷經大餓小餓相加無數次，依然能成聖成仙。",
+ "",
+ "試問我等情況可有比邱大仙差？",
+ "若能修道除去二心，堅定初心，未來必然，成佛有餘。"
+];
+
+function screenEpilogue(){
+  go(`
+  <div class="ending-title">結　語</div>
+  ${ART.cover}
+  <div class="card">
+    <div class="vow" style="font-size:18px;line-height:2.6">
+      ${EPILOGUE.map(l=>l?`<span class="em">${l}</span><br>`:"<br>").join("")}
+    </div>
+    <div class="rule"></div>
+    <div class="center" style="font-size:22px;letter-spacing:.5em;text-indent:.5em;color:var(--gold)">共勉之</div>
+  </div>
+  <div class="center">
+    <button class="btn" onclick="screenTitle()">再　來　一　次</button><br>
+    <button class="btn ghost small-btn" onclick="downloadPPT()">下載成 PPT 講義</button>
+  </div>`);
+}
+
+/* =======================================================================
+   PPT 匯出
+   ======================================================================= */
+const PPTX_SKELETON = {"_rels/.rels": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"ppt/presentation.xml\"/></Relationships>", "ppt/slideMasters/slideMaster1.xml": "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n<p:sldMaster xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\"><p:cSld><p:bg><p:bgRef idx=\"1001\"><a:schemeClr val=\"bg1\"/></p:bgRef></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id=\"1\" name=\"\"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/><a:chOff x=\"0\" y=\"0\"/><a:chExt cx=\"0\" cy=\"0\"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id=\"2\" name=\"Title Placeholder 1\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"title\"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x=\"457200\" y=\"274638\"/><a:ext cx=\"8229600\" cy=\"1143000\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert=\"horz\" lIns=\"91440\" tIns=\"45720\" rIns=\"91440\" bIns=\"45720\" rtlCol=\"0\" anchor=\"ctr\"><a:normAutofit/></a:bodyPr><a:lstStyle/><a:p><a:r><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>Click to edit Master title style</a:t></a:r><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id=\"3\" name=\"Text Placeholder 2\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"body\" idx=\"1\"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x=\"457200\" y=\"1600200\"/><a:ext cx=\"8229600\" cy=\"4525963\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert=\"horz\" lIns=\"91440\" tIns=\"45720\" rIns=\"91440\" bIns=\"45720\" rtlCol=\"0\"><a:normAutofit/></a:bodyPr><a:lstStyle/><a:p><a:pPr lvl=\"0\"/><a:r><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl=\"1\"/><a:r><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl=\"2\"/><a:r><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl=\"3\"/><a:r><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl=\"4\"/><a:r><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>Fifth level</a:t></a:r><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id=\"4\" name=\"Date Placeholder 3\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"dt\" sz=\"half\" idx=\"2\"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x=\"457200\" y=\"6356350\"/><a:ext cx=\"2133600\" cy=\"365125\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert=\"horz\" lIns=\"91440\" tIns=\"45720\" rIns=\"91440\" bIns=\"45720\" rtlCol=\"0\" anchor=\"ctr\"/><a:lstStyle><a:lvl1pPr algn=\"l\"><a:defRPr sz=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"><a:tint val=\"75000\"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl1pPr></a:lstStyle><a:p><a:fld id=\"{5BCAD085-E8A6-8845-BD4E-CB4CCA059FC4}\" type=\"datetimeFigureOut\"><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>1/27/13</a:t></a:fld><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id=\"5\" name=\"Footer Placeholder 4\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"ftr\" sz=\"quarter\" idx=\"3\"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x=\"3124200\" y=\"6356350\"/><a:ext cx=\"2895600\" cy=\"365125\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert=\"horz\" lIns=\"91440\" tIns=\"45720\" rIns=\"91440\" bIns=\"45720\" rtlCol=\"0\" anchor=\"ctr\"/><a:lstStyle><a:lvl1pPr algn=\"ctr\"><a:defRPr sz=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"><a:tint val=\"75000\"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl1pPr></a:lstStyle><a:p><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id=\"6\" name=\"Slide Number Placeholder 5\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"sldNum\" sz=\"quarter\" idx=\"4\"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x=\"6553200\" y=\"6356350\"/><a:ext cx=\"2133600\" cy=\"365125\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert=\"horz\" lIns=\"91440\" tIns=\"45720\" rIns=\"91440\" bIns=\"45720\" rtlCol=\"0\" anchor=\"ctr\"/><a:lstStyle><a:lvl1pPr algn=\"r\"><a:defRPr sz=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"><a:tint val=\"75000\"/></a:schemeClr></a:solidFill></a:defRPr></a:lvl1pPr></a:lstStyle><a:p><a:fld id=\"{C1FF6DA9-008F-8B48-92A6-B652298478BF}\" type=\"slidenum\"><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>\u2039#\u203a</a:t></a:fld><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp></p:spTree><p:extLst><p:ext uri=\"{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}\"><p14:creationId xmlns:p14=\"http://schemas.microsoft.com/office/powerpoint/2010/main\" val=\"2209977519\"/></p:ext></p:extLst></p:cSld><p:clrMap bg1=\"lt1\" tx1=\"dk1\" bg2=\"lt2\" tx2=\"dk2\" accent1=\"accent1\" accent2=\"accent2\" accent3=\"accent3\" accent4=\"accent4\" accent5=\"accent5\" accent6=\"accent6\" hlink=\"hlink\" folHlink=\"folHlink\"/><p:sldLayoutIdLst><p:sldLayoutId id=\"2147483649\" r:id=\"rId1\"/></p:sldLayoutIdLst><p:txStyles><p:titleStyle><a:lvl1pPr algn=\"ctr\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"0\"/></a:spcBef><a:buNone/><a:defRPr sz=\"4400\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mj-lt\"/><a:ea typeface=\"+mj-ea\"/><a:cs typeface=\"+mj-cs\"/></a:defRPr></a:lvl1pPr></p:titleStyle><p:bodyStyle><a:lvl1pPr marL=\"342900\" indent=\"-342900\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2022\"/><a:defRPr sz=\"3200\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL=\"742950\" indent=\"-285750\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2013\"/><a:defRPr sz=\"2800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL=\"1143000\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2022\"/><a:defRPr sz=\"2400\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL=\"1600200\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2013\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL=\"2057400\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u00bb\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL=\"2514600\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2022\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL=\"2971800\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2022\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL=\"3429000\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2022\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL=\"3886200\" indent=\"-228600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:spcBef><a:spcPct val=\"20000\"/></a:spcBef><a:buFont typeface=\"Arial\"/><a:buChar char=\"\u2022\"/><a:defRPr sz=\"2000\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl9pPr></p:bodyStyle><p:otherStyle><a:defPPr><a:defRPr lang=\"en-US\"/></a:defPPr><a:lvl1pPr marL=\"0\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL=\"457200\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL=\"914400\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL=\"1371600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL=\"1828800\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL=\"2286000\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL=\"2743200\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL=\"3200400\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL=\"3657600\" algn=\"l\" defTabSz=\"457200\" rtl=\"0\" eaLnBrk=\"1\" latinLnBrk=\"0\" hangingPunct=\"1\"><a:defRPr sz=\"1800\" kern=\"1200\"><a:solidFill><a:schemeClr val=\"tx1\"/></a:solidFill><a:latin typeface=\"+mn-lt\"/><a:ea typeface=\"+mn-ea\"/><a:cs typeface=\"+mn-cs\"/></a:defRPr></a:lvl9pPr></p:otherStyle></p:txStyles></p:sldMaster>", "ppt/slideMasters/_rels/slideMaster1.xml.rels": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout\" Target=\"../slideLayouts/slideLayout1.xml\"/><Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme\" Target=\"../theme/theme1.xml\"/></Relationships>", "ppt/slideLayouts/slideLayout1.xml": "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n<p:sldLayout xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" type=\"blank\" preserve=\"1\"><p:cSld name=\"Blank\"><p:spTree><p:nvGrpSpPr><p:cNvPr id=\"1\" name=\"\"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/><a:chOff x=\"0\" y=\"0\"/><a:chExt cx=\"0\" cy=\"0\"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id=\"2\" name=\"Date Placeholder 1\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"dt\" sz=\"half\" idx=\"10\"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id=\"{5BCAD085-E8A6-8845-BD4E-CB4CCA059FC4}\" type=\"datetimeFigureOut\"><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>1/27/13</a:t></a:fld><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id=\"3\" name=\"Footer Placeholder 2\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"ftr\" sz=\"quarter\" idx=\"11\"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id=\"4\" name=\"Slide Number Placeholder 3\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr><p:ph type=\"sldNum\" sz=\"quarter\" idx=\"12\"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id=\"{C1FF6DA9-008F-8B48-92A6-B652298478BF}\" type=\"slidenum\"><a:rPr lang=\"en-US\" smtClean=\"0\"/><a:t>\u2039#\u203a</a:t></a:fld><a:endParaRPr lang=\"en-US\"/></a:p></p:txBody></p:sp></p:spTree><p:extLst><p:ext uri=\"{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}\"><p14:creationId xmlns:p14=\"http://schemas.microsoft.com/office/powerpoint/2010/main\" val=\"1212999818\"/></p:ext></p:extLst></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>", "ppt/slideLayouts/_rels/slideLayout1.xml.rels": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\"><Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster\" Target=\"../slideMasters/slideMaster1.xml\"/></Relationships>", "ppt/theme/theme1.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<a:theme xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" name=\"Office Theme\"><a:themeElements><a:clrScheme name=\"Office\"><a:dk1><a:sysClr val=\"windowText\" lastClr=\"000000\"/></a:dk1><a:lt1><a:sysClr val=\"window\" lastClr=\"FFFFFF\"/></a:lt1><a:dk2><a:srgbClr val=\"1F497D\"/></a:dk2><a:lt2><a:srgbClr val=\"EEECE1\"/></a:lt2><a:accent1><a:srgbClr val=\"4F81BD\"/></a:accent1><a:accent2><a:srgbClr val=\"C0504D\"/></a:accent2><a:accent3><a:srgbClr val=\"9BBB59\"/></a:accent3><a:accent4><a:srgbClr val=\"8064A2\"/></a:accent4><a:accent5><a:srgbClr val=\"4BACC6\"/></a:accent5><a:accent6><a:srgbClr val=\"F79646\"/></a:accent6><a:hlink><a:srgbClr val=\"0000FF\"/></a:hlink><a:folHlink><a:srgbClr val=\"800080\"/></a:folHlink></a:clrScheme><a:fontScheme name=\"Office\"><a:majorFont><a:latin typeface=\"Calibri\"/><a:ea typeface=\"\"/><a:cs typeface=\"\"/><a:font script=\"Jpan\" typeface=\"\uff2d\uff33 \uff30\u30b4\u30b7\u30c3\u30af\"/><a:font script=\"Hang\" typeface=\"\ub9d1\uc740 \uace0\ub515\"/><a:font script=\"Hans\" typeface=\"\u5b8b\u4f53\"/><a:font script=\"Hant\" typeface=\"\u65b0\u7d30\u660e\u9ad4\"/><a:font script=\"Arab\" typeface=\"Times New Roman\"/><a:font script=\"Hebr\" typeface=\"Times New Roman\"/><a:font script=\"Thai\" typeface=\"Angsana New\"/><a:font script=\"Ethi\" typeface=\"Nyala\"/><a:font script=\"Beng\" typeface=\"Vrinda\"/><a:font script=\"Gujr\" typeface=\"Shruti\"/><a:font script=\"Khmr\" typeface=\"MoolBoran\"/><a:font script=\"Knda\" typeface=\"Tunga\"/><a:font script=\"Guru\" typeface=\"Raavi\"/><a:font script=\"Cans\" typeface=\"Euphemia\"/><a:font script=\"Cher\" typeface=\"Plantagenet Cherokee\"/><a:font script=\"Yiii\" typeface=\"Microsoft Yi Baiti\"/><a:font script=\"Tibt\" typeface=\"Microsoft Himalaya\"/><a:font script=\"Thaa\" typeface=\"MV Boli\"/><a:font script=\"Deva\" typeface=\"Mangal\"/><a:font script=\"Telu\" typeface=\"Gautami\"/><a:font script=\"Taml\" typeface=\"Latha\"/><a:font script=\"Syrc\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Orya\" typeface=\"Kalinga\"/><a:font script=\"Mlym\" typeface=\"Kartika\"/><a:font script=\"Laoo\" typeface=\"DokChampa\"/><a:font script=\"Sinh\" typeface=\"Iskoola Pota\"/><a:font script=\"Mong\" typeface=\"Mongolian Baiti\"/><a:font script=\"Viet\" typeface=\"Times New Roman\"/><a:font script=\"Uigh\" typeface=\"Microsoft Uighur\"/><a:font script=\"Geor\" typeface=\"Sylfaen\"/></a:majorFont><a:minorFont><a:latin typeface=\"Calibri\"/><a:ea typeface=\"\"/><a:cs typeface=\"\"/><a:font script=\"Jpan\" typeface=\"\uff2d\uff33 \uff30\u30b4\u30b7\u30c3\u30af\"/><a:font script=\"Hang\" typeface=\"\ub9d1\uc740 \uace0\ub515\"/><a:font script=\"Hans\" typeface=\"\u5b8b\u4f53\"/><a:font script=\"Hant\" typeface=\"\u65b0\u7d30\u660e\u9ad4\"/><a:font script=\"Arab\" typeface=\"Arial\"/><a:font script=\"Hebr\" typeface=\"Arial\"/><a:font script=\"Thai\" typeface=\"Cordia New\"/><a:font script=\"Ethi\" typeface=\"Nyala\"/><a:font script=\"Beng\" typeface=\"Vrinda\"/><a:font script=\"Gujr\" typeface=\"Shruti\"/><a:font script=\"Khmr\" typeface=\"DaunPenh\"/><a:font script=\"Knda\" typeface=\"Tunga\"/><a:font script=\"Guru\" typeface=\"Raavi\"/><a:font script=\"Cans\" typeface=\"Euphemia\"/><a:font script=\"Cher\" typeface=\"Plantagenet Cherokee\"/><a:font script=\"Yiii\" typeface=\"Microsoft Yi Baiti\"/><a:font script=\"Tibt\" typeface=\"Microsoft Himalaya\"/><a:font script=\"Thaa\" typeface=\"MV Boli\"/><a:font script=\"Deva\" typeface=\"Mangal\"/><a:font script=\"Telu\" typeface=\"Gautami\"/><a:font script=\"Taml\" typeface=\"Latha\"/><a:font script=\"Syrc\" typeface=\"Estrangelo Edessa\"/><a:font script=\"Orya\" typeface=\"Kalinga\"/><a:font script=\"Mlym\" typeface=\"Kartika\"/><a:font script=\"Laoo\" typeface=\"DokChampa\"/><a:font script=\"Sinh\" typeface=\"Iskoola Pota\"/><a:font script=\"Mong\" typeface=\"Mongolian Baiti\"/><a:font script=\"Viet\" typeface=\"Arial\"/><a:font script=\"Uigh\" typeface=\"Microsoft Uighur\"/><a:font script=\"Geor\" typeface=\"Sylfaen\"/></a:minorFont></a:fontScheme><a:fmtScheme name=\"Office\"><a:fillStyleLst><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:tint val=\"50000\"/><a:satMod val=\"300000\"/></a:schemeClr></a:gs><a:gs pos=\"35000\"><a:schemeClr val=\"phClr\"><a:tint val=\"37000\"/><a:satMod val=\"300000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:tint val=\"15000\"/><a:satMod val=\"350000\"/></a:schemeClr></a:gs></a:gsLst><a:lin ang=\"16200000\" scaled=\"1\"/></a:gradFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:tint val=\"100000\"/><a:shade val=\"100000\"/><a:satMod val=\"130000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:tint val=\"50000\"/><a:shade val=\"100000\"/><a:satMod val=\"350000\"/></a:schemeClr></a:gs></a:gsLst><a:lin ang=\"16200000\" scaled=\"0\"/></a:gradFill></a:fillStyleLst><a:lnStyleLst><a:ln w=\"9525\" cap=\"flat\" cmpd=\"sng\" algn=\"ctr\"><a:solidFill><a:schemeClr val=\"phClr\"><a:shade val=\"95000\"/><a:satMod val=\"105000\"/></a:schemeClr></a:solidFill><a:prstDash val=\"solid\"/></a:ln><a:ln w=\"25400\" cap=\"flat\" cmpd=\"sng\" algn=\"ctr\"><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:prstDash val=\"solid\"/></a:ln><a:ln w=\"38100\" cap=\"flat\" cmpd=\"sng\" algn=\"ctr\"><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:prstDash val=\"solid\"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst><a:outerShdw blurRad=\"40000\" dist=\"20000\" dir=\"5400000\" rotWithShape=\"0\"><a:srgbClr val=\"000000\"><a:alpha val=\"38000\"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad=\"40000\" dist=\"23000\" dir=\"5400000\" rotWithShape=\"0\"><a:srgbClr val=\"000000\"><a:alpha val=\"35000\"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad=\"40000\" dist=\"23000\" dir=\"5400000\" rotWithShape=\"0\"><a:srgbClr val=\"000000\"><a:alpha val=\"35000\"/></a:srgbClr></a:outerShdw></a:effectLst><a:scene3d><a:camera prst=\"orthographicFront\"><a:rot lat=\"0\" lon=\"0\" rev=\"0\"/></a:camera><a:lightRig rig=\"threePt\" dir=\"t\"><a:rot lat=\"0\" lon=\"0\" rev=\"1200000\"/></a:lightRig></a:scene3d><a:sp3d><a:bevelT w=\"63500\" h=\"25400\"/></a:sp3d></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val=\"phClr\"/></a:solidFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:tint val=\"40000\"/><a:satMod val=\"350000\"/></a:schemeClr></a:gs><a:gs pos=\"40000\"><a:schemeClr val=\"phClr\"><a:tint val=\"45000\"/><a:shade val=\"99000\"/><a:satMod val=\"350000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:shade val=\"20000\"/><a:satMod val=\"255000\"/></a:schemeClr></a:gs></a:gsLst><a:path path=\"circle\"><a:fillToRect l=\"50000\" t=\"-80000\" r=\"50000\" b=\"180000\"/></a:path></a:gradFill><a:gradFill rotWithShape=\"1\"><a:gsLst><a:gs pos=\"0\"><a:schemeClr val=\"phClr\"><a:tint val=\"80000\"/><a:satMod val=\"300000\"/></a:schemeClr></a:gs><a:gs pos=\"100000\"><a:schemeClr val=\"phClr\"><a:shade val=\"30000\"/><a:satMod val=\"200000\"/></a:schemeClr></a:gs></a:gsLst><a:path path=\"circle\"><a:fillToRect l=\"50000\" t=\"50000\" r=\"50000\" b=\"50000\"/></a:path></a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults><a:spDef><a:spPr/><a:bodyPr/><a:lstStyle/><a:style><a:lnRef idx=\"1\"><a:schemeClr val=\"accent1\"/></a:lnRef><a:fillRef idx=\"3\"><a:schemeClr val=\"accent1\"/></a:fillRef><a:effectRef idx=\"2\"><a:schemeClr val=\"accent1\"/></a:effectRef><a:fontRef idx=\"minor\"><a:schemeClr val=\"lt1\"/></a:fontRef></a:style></a:spDef><a:lnDef><a:spPr/><a:bodyPr/><a:lstStyle/><a:style><a:lnRef idx=\"2\"><a:schemeClr val=\"accent1\"/></a:lnRef><a:fillRef idx=\"0\"><a:schemeClr val=\"accent1\"/></a:fillRef><a:effectRef idx=\"1\"><a:schemeClr val=\"accent1\"/></a:effectRef><a:fontRef idx=\"minor\"><a:schemeClr val=\"tx1\"/></a:fontRef></a:style></a:lnDef></a:objectDefaults><a:extraClrSchemeLst/></a:theme>"};
+
+const CRC_TABLE=(function(){
+  const t=new Uint32Array(256);
+  for(let n=0;n<256;n++){ let c=n;
+    for(let k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1);
+    t[n]=c>>>0; }
+  return t;
+})();
+function crc32(buf){
+  let c=0xFFFFFFFF;
+  for(let i=0;i<buf.length;i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c>>>8);
+  return (c ^ 0xFFFFFFFF)>>>0;
+}
+function zipStore(files){
+  const enc=new TextEncoder(), parts=[], central=[];
+  let offset=0;
+  const u16=v=>[v&0xFF,(v>>8)&0xFF];
+  const u32=v=>[v&0xFF,(v>>8)&0xFF,(v>>16)&0xFF,(v>>>24)&0xFF];
+  for(const name in files){
+    const v=files[name];
+    const nameB=enc.encode(name);
+    const data=(v instanceof Uint8Array)?v:enc.encode(v);   // 二進位（PNG）或文字（XML）
+    const crc=crc32(data);
+    const local=[].concat([0x50,0x4B,0x03,0x04],u16(20),u16(0x0800),u16(0),u16(0),u16(0),
+      u32(crc),u32(data.length),u32(data.length),u16(nameB.length),u16(0));
+    parts.push(new Uint8Array(local), nameB, data);
+    central.push({name:nameB,crc,size:data.length,offset});
+    offset += local.length + nameB.length + data.length;
+  }
+  const cdir=[];
+  for(const e of central){
+    const h=[].concat([0x50,0x4B,0x01,0x02],u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0),
+      u32(e.crc),u32(e.size),u32(e.size),u16(e.name.length),u16(0),u16(0),u16(0),u16(0),
+      u32(0),u32(e.offset));
+    cdir.push(new Uint8Array(h), e.name);
+  }
+  const cdirSize=cdir.reduce((s,a)=>s+a.length,0);
+  const end=new Uint8Array([].concat([0x50,0x4B,0x05,0x06],u16(0),u16(0),
+    u16(central.length),u16(central.length),u32(cdirSize),u32(offset),u16(0)));
+  const all=parts.concat(cdir,[end]);
+  const total=all.reduce((s,a)=>s+a.length,0);
+  const out=new Uint8Array(total); let p=0;
+  for(const a of all){ out.set(a,p); p+=a.length; }
+  return out;
+}
+
+const XH='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+const RNS='xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
+const RT='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+const PFONT='Microsoft JhengHei';
+
+function xesc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function htmlToLines(html){
+  let s=String(html)
+    .replace(/<tr[^>]*>/g,"\n")
+    .replace(/<\/td>\s*<td>/g,"：")
+    .replace(/<div class="quote">/g,"<br>")
+    .replace(/<\/div>/g,"<br>")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<[^>]+>/g,"")
+    .replace(/&nbsp;/g," ").replace(/&amp;/g,"&")
+    .replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"');
+  return s.split("\n").map(x=>x.trim()).filter((x,i,a)=>!(x===""&&a[i-1]===""));
+}
+function pptPara(text,sz,color,bold,algn){
+  const rpr=`<a:rPr lang="zh-TW" altLang="en-US" sz="${sz}" b="${bold?1:0}" dirty="0">`+
+    `<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>`+
+    `<a:latin typeface="${PFONT}"/><a:ea typeface="${PFONT}"/></a:rPr>`;
+  const body = text ? `<a:r>${rpr}<a:t>${xesc(text)}</a:t></a:r>`
+    : `<a:endParaRPr lang="zh-TW" sz="${sz}"><a:latin typeface="${PFONT}"/><a:ea typeface="${PFONT}"/></a:endParaRPr>`;
+  return `<a:p><a:pPr algn="${algn||'l'}"><a:lnSpc><a:spcPct val="125000"/></a:lnSpc></a:pPr>${body}</a:p>`;
+}
+function pptBox(id,x,y,cx,cy,paras,anchor){
+  return `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="tb${id}"/>`+
+    `<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>`+
+    `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>`+
+    `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>`+
+    `<p:txBody><a:bodyPr wrap="square" anchor="${anchor||'t'}"><a:normAutofit/></a:bodyPr>`+
+    `<a:lstStyle/>${paras.join("")}</p:txBody></p:sp>`;
+}
+function pptSlide(shapes){
+  return XH+'<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '+
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '+
+    'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld>'+
+    '<p:bg><p:bgPr><a:solidFill><a:srgbClr val="14110E"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>'+
+    '<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>'+
+    '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/>'+
+    '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>'+
+    shapes.join("")+
+    '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>';
+}
+/* ---- SVG → PNG（canvas），供 pptx 內嵌 ---- */
+const SVG_CSS='<style type="text/css"><![CDATA['+
+ '.ink{fill:none;stroke:#ece3d2;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}'+
+ '.gold{fill:none;stroke:#c9a227;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}'+
+ '.far{fill:none;stroke:#c9a227;stroke-width:1.4;opacity:.42;stroke-linecap:round}'+
+ '.red{fill:none;stroke:#a83232;stroke-width:2.2;stroke-linecap:round}'+
+ '.fillp{fill:#ece3d2;stroke:none}.fillg{fill:#c9a227;stroke:none}.fillr{fill:#a83232;stroke:none}'+
+ 'text{font-family:"Microsoft JhengHei","MingLiU",serif}'+
+ ']]></style>';
+
+function svgStandalone(svg){
+  // 加上 xmlns / 尺寸 / 內嵌樣式 / 底色，讓它能單獨當成圖片渲染
+  let s=svg.replace('<svg class="art" viewBox="0 0 800 180"',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="360" viewBox="0 0 800 180"');
+  const i=s.indexOf(">")+1;
+  return s.slice(0,i)+SVG_CSS+
+    '<rect width="800" height="180" fill="#14110E"/>'+
+    '<rect x="1" y="1" width="798" height="178" fill="none" stroke="#c9a227" stroke-opacity=".35" stroke-width="1.5"/>'+
+    s.slice(i);
+}
+
+function svgToPng(svg,w,h){
+  return new Promise((resolve,reject)=>{
+    const blob=new Blob([svgStandalone(svg)],{type:"image/svg+xml;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    img.onload=function(){
+      try{
+        const c=document.createElement("canvas");
+        c.width=w; c.height=h;
+        const ctx=c.getContext("2d");
+        ctx.fillStyle="#14110E"; ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url);
+        const b64=c.toDataURL("image/png").split(",")[1];
+        const bin=atob(b64), arr=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+        resolve(arr);
+      }catch(e){ URL.revokeObjectURL(url); reject(e); }
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); reject(new Error("SVG 無法轉為圖片")); };
+    img.src=url;
+  });
+}
+
+/* 圖片形狀（rId2 固定為該張投影片的圖） */
+function pptPic(id,x,y,cx,cy){
+  return `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="art${id}"/>`+
+    `<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>`+
+    `<p:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>`+
+    `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>`+
+    `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`;
+}
+
+const LINES_PER_SLIDE=13;
+const LINES_WITH_ART=8;
+/* 回傳 [{xml, art}]；art 為圖名（只有該事件的第一張投影片帶圖） */
+function slidePage(kicker,title,lines,opt){
+  opt=opt||{};
+  const out=[], chunks=[];
+  const per=opt.art?LINES_WITH_ART:LINES_PER_SLIDE;
+  for(let i=0;i<lines.length;i+=per) chunks.push(lines.slice(i,i+per));
+  if(!chunks.length) chunks.push([]);
+  chunks.forEach((chunk,ci)=>{
+    const sh=[], withArt=(ci===0&&opt.art);
+    if(kicker) sh.push(pptBox(2,700000,400000,10800000,460000,
+      [pptPara(kicker,1300,"C9A227",false,opt.algn)]));
+    sh.push(pptBox(3,700000,830000,10800000,1100000,
+      [pptPara(title+(ci?"（續）":""),opt.big?4000:2800,"E8C65A",true,opt.algn)]));
+    if(withArt){
+      // 圖：寬 7,200,000 EMU（800:180 → 高 1,620,000），置中
+      sh.push(pptPic(9,2496000,1980000,7200000,1620000));
+      sh.push(pptBox(4,700000,3760000,10800000,2760000,
+        chunk.map(t=>pptPara(t,opt.sz||1500,t.charAt(0)==="「"?"D8CCB4":"ECE3D2",false,opt.algn)),
+        opt.anchor));
+    }else{
+      sh.push(pptBox(4,700000,2100000,10800000,4300000,
+        chunk.map(t=>pptPara(t,opt.sz||1700,t.charAt(0)==="「"?"D8CCB4":"ECE3D2",false,opt.algn)),
+        opt.anchor));
+    }
+    out.push({xml:pptSlide(sh), art:withArt?opt.art:null});
+  });
+  return out;
+}
+
+function buildSlides(){
+  const P=[];
+  P.push.apply(P, slidePage("","邱長春大仙行誼",
+    ["模　擬　互　動","","問賢士們，你相信命運呢？還是相信運命呢？"],
+    {algn:"ctr",big:true,sz:1800,art:"cover"}));
+  P.push.apply(P, slidePage("開場","命運｜運命",[
+    "康熙字典的解釋是：命也，不可改；運也，可以轉。","",
+    "沒有修行的人，很容易隨既有的業力運轉而走完一生，這就是被「命」所「運」；","",
+    "但是，以大修行者來說剛好顛倒，他能夠主宰及運用自己有限的生命，這就叫做「運命」。"]));
+  P.push.apply(P, slidePage("人物與生平","邱長春大仙",[
+    "原名邱處機，字啟發，號長春子。",
+    "南宋末年，山東登州府棲霞縣荳村人。",
+    "弟兄三人，父母早喪，多蒙兄嫂看顧得以成人。讀過幾年書也能詩詞歌賦。","",
+    "無心功名，一味好靜。兄嫂勸他求功名，他答：",
+    "「讀書原為窮理，豈希圖功名！」",
+    "兄嫂要與他議婚，他堅辭：",
+    "「男子未立，豈可以婚姻絆絏。」","",
+    "「人生在世，苦不尋個出頭路徑，終日爭名奪利、貪妻戀子，無常一到，萬事皆空。」","",
+    "十九歲聽說馬家庄有王重陽先生，暗地收拾盤費，悄悄離家而去。","",
+    "七真：邱長春・劉長生・譚長真・馬丹陽・郝太古・王玉陽・孫不二"]));
+  P.push.apply(P, slidePage("角色設定","初始數值",[
+    "意志力　70%／100%",
+    "　低於 20%，道心破裂，無法修行，判定模擬失敗。","",
+    "修道心　10%／100%",
+    "　決定錯誤則下降至 10% 以下，判定模擬失敗。","",
+    "修行進度　0%／100%　　達 100% 觸發特殊事件。","",
+    "【圓滿條件】意志力、修道心、修行進度　三項都要達到 100%，才能圓滿成仙。"]));
+  P.push.apply(P, slidePage("角色設定","特性一　命苦之人",[
+    "苦根重，人生路途經常不如意、不順遂。","",
+    "選擇錯誤 → 一律判定失敗。",
+    "選擇不夠好的答案 → 消耗 15% 意志力，劇情繼續。",
+    "選擇正確 → 仍有 30% 機率觸發壞情況：",
+    "　其中 30%：直接判定失敗，該章重新選擇。",
+    "　其中 70%：消耗 10% 意志力，劇情繼續。"]));
+  P.push.apply(P, slidePage("角色設定","特性二　騰蛇鎖口",[
+    "福氣不足，為餓死之相，可經過修行改善。目前改變進度 0%。","",
+    "隨機觸發飢餓事件，分大餓與小餓兩種。",
+    "大餓需經歷 72 次，小餓需經歷無數次。",
+    "改變進度 ＝ 大餓次數 ÷ 72，集滿 72 次大餓才能圓滿。",
+    "每次經歷飢餓事件，有機會觸發堅定修道心，使修道心增加。"]));
+
+  let lastCh=0;
+  FLOW.forEach(id=>{
+    const node=EVENTS[id]||TALKS[id]||STORIES[id];
+    if(node.ch!==lastCh){
+      lastCh=node.ch;
+      P.push.apply(P, slidePage("章節",CH[node.ch].name.replace(/^第.章　/,""),
+        [CH[node.ch].name],{algn:"ctr",big:true,anchor:"ctr"}));
+    }
+    if(EVENTS[id]){
+      const ev=node;
+      const q=htmlToLines(ev.scene).concat(["","【"+ev.ask+"】",""],
+        ev.opts.map((o,i)=>(i+1)+". "+o.t));
+      P.push.apply(P, slidePage(CH[ev.ch].name,ev.title,q,{art:ev.art}));
+      const a=[];
+      ev.opts.forEach((o,i)=>{
+        const mark=o.kind==="ok"?"○ 正解":(o.kind==="mid"?"△ 可通過，有代價":"✕ 模擬失敗");
+        a.push((i+1)+". "+o.t+"　【"+mark+"】");
+        htmlToLines(o.res).forEach(t=>a.push("　"+t));
+        if(o.src){ a.push("　〔七真史傳〕"); htmlToLines(o.src).forEach(t=>a.push("　"+t)); }
+        a.push("");
+      });
+      P.push.apply(P, slidePage(ev.title,"解答與去向",a,{sz:1400}));
+    }else if(TALKS[id]){
+      const t=node;
+      P.push.apply(P, slidePage(t.kicker,t.title,
+        htmlToLines(t.lead).concat([""],t.qs.map((q,i)=>"問題 "+(i+1)+"　"+q)),{art:t.art}));
+      const r=[];
+      t.reveals.forEach((x,i)=>{ htmlToLines(x).forEach(l=>r.push(l)); r.push(""); });
+      P.push.apply(P, slidePage(t.title,"參考開示",r,{sz:1600}));
+    }else{
+      const st=node;
+      st.pages.forEach((pg,pi)=>{
+        if(pg==="__WILLS__"){
+          P.push.apply(P, slidePage(st.kicker,"臨終遺言・七真各別囑咐",
+            st.wills.map(w=>w[0]+"："+htmlToLines(w[1]).join("")),
+            {sz:1500,art:pi===0?st.art:null}));
+        }else{
+          P.push.apply(P, slidePage(st.kicker,st.title,htmlToLines(pg),
+            {sz:1600,art:pi===0?st.art:null}));
+        }
+      });
+    }
+  });
+
+  P.push.apply(P, slidePage("修行進度 100%","★ 特殊事件　"+SPECIAL.title,
+    htmlToLines(SPECIAL.scene).concat(["","【"+SPECIAL.ask+"】",""],
+      SPECIAL.opts.map((t,i)=>(i+1)+". "+t)),{art:SPECIAL.art}));
+  P.push.apply(P, slidePage("★ 特殊事件","解答與去向",
+    SPECIAL.res.map((t,i)=>(i+1)+". "+t),{sz:1500}));
+  P.push.apply(P, slidePage("第四章","天仙狀元",["特殊事件通過之後"],
+    {algn:"ctr",big:true,anchor:"ctr"}));
+  ENDINGS.forEach(e=>{
+    P.push.apply(P, slidePage(e.step,e.title,htmlToLines(e.html),{sz:1500}));
+  });
+  P.push.apply(P, slidePage("回向","邱長春大仙慈悲",[
+    "智者只知道改變方法，不改目標；","愚者常改變目標，而不改方法。","",
+    "修道人要存大仁，去接受所不能改變的一切；",
+    "存大勇，去改變所能改變的一切；",
+    "存大智，去分辨兩者之間的差別；",
+    "並且存大愿，使人人都有此自覺。"],{algn:"ctr"}));
+  P.push.apply(P, slidePage("","命也，不可改　運也，可以轉",
+    ["問賢士們——你是相信命運，還是相信運命？"],
+    {algn:"ctr",anchor:"ctr",sz:2000}));
+  P.push.apply(P, slidePage("結語","共　勉　之",
+    EPILOGUE.concat(["","共勉之"]),{algn:"ctr",sz:1400,art:"cover"}));
+  return P;
+}
+
+async function downloadPPT(){
+  try{
+    if(!PPTX_SKELETON || !PPTX_SKELETON["ppt/theme/theme1.xml"]){
+      toast("PPT 骨架未載入，無法匯出"); return;
+    }
+    toast("正在產生 PPT…",8000);
+    const slides=buildSlides(), n=slides.length;
+    const files={};
+    for(const k in PPTX_SKELETON) files[k]=PPTX_SKELETON[k];
+
+    // --- 插圖：SVG → PNG → ppt/media ---
+    const used=[], media={};
+    slides.forEach(s=>{ if(s.art && used.indexOf(s.art)<0) used.push(s.art); });
+    let imgOK=0;
+    for(let k=0;k<used.length;k++){
+      toast("正在轉換插圖　"+(k+1)+" / "+used.length,9000);
+      await new Promise(r=>setTimeout(r,0));   // 讓 toast 有機會重繪
+      try{
+        const png=await svgToPng(ART[used[k]],1600,360);
+        imgOK++;
+        media[used[k]]=imgOK;
+        files["ppt/media/image"+imgOK+".png"]=png;
+      }catch(e){ console.warn("插圖轉檔失敗：",used[k],e); }
+    }
+
+    let ct=XH+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+      '<Default Extension="xml" ContentType="application/xml"/>'+
+      (imgOK?'<Default Extension="png" ContentType="image/png"/>':'')+
+      '<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>'+
+      '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>'+
+      '<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>'+
+      '<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>';
+    let sldIds="", presRels=`<Relationship Id="rId1" Type="${RT}/slideMaster" Target="slideMasters/slideMaster1.xml"/>`;
+    for(let i=1;i<=n;i++){
+      const sl=slides[i-1];
+      const hasImg=sl.art && media[sl.art];
+      // 沒轉成圖的話，把圖形狀從 XML 拿掉，避免產生壞掉的引用
+      files["ppt/slides/slide"+i+".xml"]=hasImg?sl.xml:sl.xml.replace(/<p:pic>[\s\S]*?<\/p:pic>/,"");
+      let rels=`<Relationship Id="rId1" Type="${RT}/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>`;
+      if(hasImg) rels+=`<Relationship Id="rId2" Type="${RT}/image" Target="../media/image${media[sl.art]}.png"/>`;
+      files["ppt/slides/_rels/slide"+i+".xml.rels"]=XH+`<Relationships ${RNS}>${rels}</Relationships>`;
+      ct+=`<Override PartName="/ppt/slides/slide${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`;
+      sldIds+=`<p:sldId id="${255+i}" r:id="rId${i+1}"/>`;
+      presRels+=`<Relationship Id="rId${i+1}" Type="${RT}/slide" Target="slides/slide${i}.xml"/>`;
+    }
+    ct+="</Types>";
+    presRels+=`<Relationship Id="rId${n+2}" Type="${RT}/theme" Target="theme/theme1.xml"/>`;
+
+    files["[Content_Types].xml"]=ct;
+    files["ppt/presentation.xml"]=XH+
+      '<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '+
+      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '+
+      'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" saveSubsetFonts="1">'+
+      '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>'+
+      `<p:sldIdLst>${sldIds}</p:sldIdLst>`+
+      '<p:sldSz cx="12192000" cy="6858000"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>';
+    files["ppt/_rels/presentation.xml.rels"]=XH+`<Relationships ${RNS}>${presRels}</Relationships>`;
+
+    const bytes=zipStore(files);
+    const blob=new Blob([bytes],{type:"application/vnd.openxmlformats-officedocument.presentationml.presentation"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="邱大仙行誼_運命.pptx";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+    toast("已產生 "+n+" 張投影片（含 "+imgOK+" 張插圖），開始下載",4000);
+  }catch(err){
+    toast("匯出失敗："+err.message,5000);
+    console.error(err);
+  }
+}
+
+screenTitle();
+</script>
+</body>
+</html>
