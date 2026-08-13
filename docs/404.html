@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>頁面不存在 —— 運命</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#14110e; --paper:#ece3d2; --paper2:#d8ccb4;
+  --gold:#c9a227; --gold2:#e8c65a; --red:#a83232; --red2:#c94f4f;
+  --line:rgba(201,162,39,.28);
+}
+html,body{height:100%;}
+body{
+  background:var(--ink);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201,162,39,.07), transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(168,50,50,.07), transparent 60%);
+  color:var(--paper);
+  font-family:"Noto Serif TC","Source Han Serif TC","MingLiU","PMingLiU",serif;
+  line-height:1.9; letter-spacing:.03em;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px 16px;
+}
+.card{
+  max-width:620px; width:100%;
+  background:linear-gradient(160deg,rgba(236,227,210,.055),rgba(236,227,210,.02));
+  border:1px solid var(--line); border-radius:4px;
+  padding:52px 34px;
+  box-shadow:0 2px 24px rgba(0,0,0,.4) inset, 0 4px 18px rgba(0,0,0,.3);
+  text-align:center;
+}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:22px 0;}
+h1{font-size:clamp(42px,10vw,72px);letter-spacing:.34em;text-indent:.34em;
+   color:var(--gold2);font-weight:400;margin-bottom:8px;
+   text-shadow:0 0 26px rgba(201,162,39,.35);}
+.sub{color:var(--paper2);opacity:.85;font-size:14px;letter-spacing:.2em;}
+.msg{font-size:16px;color:var(--paper2);line-height:2.1;}
+a.btn{
+  display:inline-block;background:transparent;color:var(--gold2);
+  border:1px solid var(--gold);border-radius:3px;
+  padding:13px 38px;font-size:16px;letter-spacing:.24em;text-indent:.24em;
+  font-family:inherit;cursor:pointer;transition:.25s;margin-top:8px;
+  text-decoration:none;
+}
+a.btn:hover{background:rgba(201,162,39,.14);box-shadow:0 0 18px rgba(201,162,39,.25);}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>404</h1>
+  <div class="sub">頁　面　不　存　在</div>
+  <div class="rule"></div>
+  <p class="msg">
+    這一頁隨風去了，不在三千大千世界之中。<br>
+    回首來時路，莫忘初心——
+  </p>
+  <div class="rule"></div>
+  <a class="btn" href="./">返回《運命》</a>
+</div>
+</body>
+</html>
